@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Snace</title>
+
+    <style>
+
+        body{
+            background-color: black;
+        }
+
+        .körperteil{
+            position: absolute;
+
+            width: {{ durchmesser }}px;
+            height: {{ durchmesser }}px;
+
+            background-color: {{ farbe }};
+            border-radius: 50%;
+
+            left: {{ x }}px;
+            top: {{ y }}px;
+        }
+
+
+        .körperteil1{
+    position: absolute;
+
+    width: {{ durchmesser1 }}px;
+    height: {{ durchmesser1 }}px;
+
+    background-color: {{ farbe1 }};
+    border-radius: 50%;
+
+    left: {{ x1 }}px;
+    top: {{ y1 }}px;
+}
+
+
+.essen{
+    position: absolute;
+
+    width: 30px;
+    height: 30px;
+
+    background-color: {{ essen_farbe }};
+
+    left: {{ essen_x }}px;
+    top: {{ essen_y }}px;
+
+}
+    </style>
+
+</head>
+
+<body>
+
+<div id="körperteil" class="körperteil"></div>
+<div id="körperteil1" class="körperteil1"></div>
+<div class="essen"></div>
+<script>
+
+let kreis = document.getElementById("körperteil")
+let kreis1 = document.getElementById("körperteil1")
+
+document.addEventListener("keydown", function(event){
+
+    let richtung = null
+
+    if(event.key === "w") richtung = "up"
+    if(event.key === "s") richtung = "down"
+    if(event.key === "a") richtung = "left"
+    if(event.key === "d") richtung = "right"
+
+    if(richtung){
+
+        fetch("/move?richtung=" + richtung)
+        .then(response => response.json())
+        .then(data => {
+
+            kreis.style.left = data.x + "px"
+            kreis.style.top = data.y + "px"
+            kreis1.style.left = data.x1 + "px"
+            kreis1.style.top = data.y1 + "px"
+
+        })
+
+    }
+
+})
+
+</script>
+</body>
+</html>
