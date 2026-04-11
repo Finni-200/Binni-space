@@ -23,3 +23,6 @@ class körperteil:
 
     def get_farbe(self):
         return self.farbe
+    
+    def get_position(self):
+        return self.x, self.y
