@@ -24,8 +24,35 @@
         0 0 20px #ff00cc,
         0 0 30px #ff00cc;
 
-    transition: left 0.1s linear, top 0.1s linear;
+    transition: left 0.2s linear, top 0.2s linear;
 }
+
+    #levelAnzeige{
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+
+    font-size: 40px;
+    font-weight: bold;
+
+    color: white;
+
+    background: radial-gradient(circle at 30% 30%, #ff9afc, #ff00cc);
+
+    padding: 10px 25px;
+    border-radius: 20px;
+
+    box-shadow:
+        0 0 10px #ff00cc,
+        0 0 20px #ff00cc,
+        0 0 40px #ff00cc;
+
+    text-shadow:
+        0 0 5px white,
+        0 0 10px #ff00cc;
+}
+
 
         .essen{
     position: absolute;
@@ -40,7 +67,7 @@
         0 0 20px red;
 }
 
-<div class="apfel-stiel"></div>
+
 
 .apfel-stiel{
     position: absolute;
@@ -88,13 +115,20 @@
 
 <div class="essen"></div>
 <div class="apfel-stiel"></div>
+<div id="levelAnzeige">LEVEL 1</div>
 
 <script>
+
+
+
+
+
 
 let spielfeldBreite = window.innerWidth;
 let spielfeldHoehe = window.innerHeight;
 
-let aktuelleRichtung = "right";
+let richtungSpieler1 = "right";
+let richtungSpieler2 = "down";
 let gameOver = false;
 
 window.addEventListener("resize", () => {
@@ -102,13 +136,16 @@ window.addEventListener("resize", () => {
     spielfeldHoehe = window.innerHeight;
 });
 
-document.addEventListener("keydown", function(event){
+window.addEventListener("keydown", (event) => {
+    if (event.key === "w") richtungSpieler1 = "up";
+    if (event.key === "s") richtungSpieler1 = "down";
+    if (event.key === "a") richtungSpieler1 = "left";
+    if (event.key === "d") richtungSpieler1 = "right";
 
-    if(event.key === "w" || event.key === "ArrowUp") aktuelleRichtung = "up";
-    if(event.key === "s" || event.key === "ArrowDown") aktuelleRichtung = "down";
-    if(event.key === "a" || event.key === "ArrowLeft") aktuelleRichtung = "left";
-    if(event.key === "d" || event.key === "ArrowRight") aktuelleRichtung = "right";
-
+    if (event.key === "ArrowUp") richtungSpieler2 = "up";
+    if (event.key === "ArrowDown") richtungSpieler2 = "down";
+    if (event.key === "ArrowLeft") richtungSpieler2 = "left";
+    if (event.key === "ArrowRight") richtungSpieler2 = "right";
 });
 
 
@@ -116,9 +153,34 @@ function bewegeSchlange(){
 
     if(gameOver) return;
 
-     fetch(`/move?richtung=${aktuelleRichtung}&breite=${spielfeldBreite}&hoehe=${spielfeldHoehe}`)
+    fetch(`/move?richtung1=${richtungSpieler1}&richtung2=${richtungSpieler2}&breite=${spielfeldBreite}&hoehe=${spielfeldHoehe}`)
     .then(response => response.json())
     .then(data => {
+
+
+let länge = data.kreise.length;
+let level = 1;
+if(länge >= 20){
+    speed = 70;
+    level = 5;
+}
+else if(länge >= 15){
+    speed = 100;
+    level = 4;
+}
+else if(länge >= 10){
+    speed = 130;
+    level = 3;
+}
+else if(länge >= 5){
+    speed = 170;
+    level = 2;
+}
+else{
+    speed = 200;
+    level = 1;
+}
+document.getElementById("levelAnzeige").innerText = "LEVEL " + level;
 
         // 💀 Game Over
         if(data.status === "game over"){
@@ -137,18 +199,12 @@ function bewegeSchlange(){
                 kreis.className = "mehr_kreis";
                 kreis.style.position = "absolute";
                 kreis.style.borderRadius = "50%";
-                kreis.style.width = "50px";
-                kreis.style.height = "50px";
-                kreis.style.backgroundColor = "pink";
+                kreis.style.width = data.kreise[i].durchmesser + "px";
+                kreis.style.height = data.kreise[i].durchmesser + "px";
                 document.body.appendChild(kreis);
             }
 
-            if(i === 0){
-        kreis.style.background = "radial-gradient(circle, #00ffcc, #0099ff)";
-    } else {
-        kreis.style.background = "radial-gradient(circle at 30% 30%, #ff9afc, #ff00cc)";
-    }
-
+            kreis.style.background = data.kreise[i].farbe;
             kreis.style.left = data.kreise[i].x + "px";
             kreis.style.top = data.kreise[i].y + "px";
         }
@@ -163,7 +219,22 @@ function bewegeSchlange(){
     });
 
 }
-setInterval(bewegeSchlange, 200);
+
+let speed = 200; // Startgeschwindigkeit
+
+function gameLoop(){
+
+    if(gameOver) return;
+
+    bewegeSchlange();
+
+    setTimeout(gameLoop, speed);
+}
+
+// 👉 starten
+gameLoop();
+
+
 </script>
 
 </body>
