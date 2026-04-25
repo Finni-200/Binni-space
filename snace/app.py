@@ -1,14 +1,18 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template
+from flask_socketio import SocketIO, emit
 from spieler import Spieler
 from essen import Essen
 
 app = Flask(__name__)
+socketio = SocketIO(app)
+
+spieler1 = Spieler("Spieler 1", "pink", 600, 500, "right")
+spieler2 = Spieler("Spieler 2", "cyan", 300, 200, "down")
 
 SPIEL_BREITE = 1200
 SPIEL_HOEHE = 800
 
-spieler1 = Spieler("Spieler 1", "pink", 600, 500, "right")
-spieler2 = Spieler("Spieler 2", "cyan", 300, 200, "down")
+
 
 essen_körper = Essen("blue", SPIEL_BREITE, SPIEL_HOEHE)
 
@@ -28,13 +32,13 @@ def index():
     )
 
 
-@app.route("/move")
-def move():
-    breite = int(request.args.get("breite"))
-    hoehe = int(request.args.get("hoehe"))
+@socketio.on('move')
+def handle_move(data):
+    breite = int(data.get("breite"))
+    hoehe = int(data.get("hoehe"))
 
-    richtung1 = request.args.get("richtung1")
-    richtung2 = request.args.get("richtung2")
+    richtung1 = data.get("richtung1")
+    richtung2 = data.get("richtung2")
 
     if richtung1:
         spieler1.set_richtung(richtung1)
@@ -48,22 +52,25 @@ def move():
     spieler2.bewege(breite, hoehe, wachse=spieler2_ate)
 
     if spieler1.kollidiert_mit(spieler1.body[1:]) or spieler1.kollidiert_mit(spieler2.body):
-        return {"status": "game over"}
+        socketio.emit('update', {"status": "game over"}, broadcast=True)
+        return
+
 
     if spieler2.kollidiert_mit(spieler2.body[1:]) or spieler2.kollidiert_mit(spieler1.body):
-        return {"status": "game over"}
+        emit('update', {"status": "game over"})
+        return
 
     if spieler1_ate or spieler2_ate:
         essen_körper.bewege()
 
-    return {
-        "kreise": get_kreise_für_render(),
-        "essen": {
-            "x": essen_körper.x,
-            "y": essen_körper.y,
-        },
-    }
+    emit('update', {
+    "kreise": get_kreise_für_render(),
+    "essen": {
+        "x": essen_körper.x,
+        "y": essen_körper.y,
+    },
+})
 
 
 if __name__ == "__main__":
-    app.run(debug=True, port=5001)
+    socketio.run(app, debug=True, port=5001)

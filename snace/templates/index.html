@@ -2,6 +2,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
     <title>Snace</title>
 
     <style>
@@ -69,15 +70,7 @@
 
 
 
-.apfel-stiel{
-    position: absolute;
-    width: 4px;
-    height: 10px;
-    background-color: green;
 
-    left: {{ essen_x + 13 }}px;
-    top: {{ essen_y - 8 }}px;
-}
         #gameOver{
     position: absolute;
     top: 50%;
@@ -119,8 +112,8 @@
 
 <script>
 
-
-
+const socket = io();
+let speed = 200; 
 
 
 
@@ -153,74 +146,69 @@ function bewegeSchlange(){
 
     if(gameOver) return;
 
-    fetch(`/move?richtung1=${richtungSpieler1}&richtung2=${richtungSpieler2}&breite=${spielfeldBreite}&hoehe=${spielfeldHoehe}`)
-    .then(response => response.json())
-    .then(data => {
+socket.emit('move', {richtung1: richtungSpieler1, richtung2: richtungSpieler2, breite: spielfeldBreite, hoehe: spielfeldHoehe});
 
+}
+socket.on('update', function(data) {
+    let länge = data.kreise.length;
+    let level = 1;
+    if(länge >= 20){
+        speed = 70;
+        level = 5;
+    }
+    else if(länge >= 15){
+        speed = 100;
+        level = 4;
+    }
+    else if(länge >= 10){
+        speed = 130;
+        level = 3;
+    }
+    else if(länge >= 5){
+        speed = 170;
+        level = 2;
+    }
+    else{
+        speed = 200;
+        level = 1;
+    }
+    document.getElementById("levelAnzeige").innerText = "LEVEL " + level;
 
-let länge = data.kreise.length;
-let level = 1;
-if(länge >= 20){
-    speed = 70;
-    level = 5;
-}
-else if(länge >= 15){
-    speed = 100;
-    level = 4;
-}
-else if(länge >= 10){
-    speed = 130;
-    level = 3;
-}
-else if(länge >= 5){
-    speed = 170;
-    level = 2;
-}
-else{
-    speed = 200;
-    level = 1;
-}
-document.getElementById("levelAnzeige").innerText = "LEVEL " + level;
+    // 💀 Game Over
+    if(data.status === "game over"){
+        document.getElementById("gameOver").style.display = "block";
+        gameOver = true;
+        return;
+    }
 
-        // 💀 Game Over
-        if(data.status === "game over"){
-            document.getElementById("gameOver").style.display = "block";
-            gameOver = true;
-            return;
+    // 🟢 Kreise updaten
+    for(let i = 0; i < data.kreise.length; i++){
+        let kreis = document.getElementById("kreis" + i);
+
+        if(!kreis){
+            kreis = document.createElement("div");
+            kreis.id = "kreis" + i;
+            kreis.className = "mehr_kreis";
+            kreis.style.position = "absolute";
+            kreis.style.borderRadius = "50%";
+            kreis.style.width = data.kreise[i].durchmesser + "px";
+            kreis.style.height = data.kreise[i].durchmesser + "px";
+            document.body.appendChild(kreis);
         }
 
-        // 🟢 Kreise updaten
-        for(let i = 0; i < data.kreise.length; i++){
-            let kreis = document.getElementById("kreis" + i);
+        kreis.style.background = data.kreise[i].farbe;
+        kreis.style.left = data.kreise[i].x + "px";
+        kreis.style.top = data.kreise[i].y + "px";
+    }
 
-            if(!kreis){
-                kreis = document.createElement("div");
-                kreis.id = "kreis" + i;
-                kreis.className = "mehr_kreis";
-                kreis.style.position = "absolute";
-                kreis.style.borderRadius = "50%";
-                kreis.style.width = data.kreise[i].durchmesser + "px";
-                kreis.style.height = data.kreise[i].durchmesser + "px";
-                document.body.appendChild(kreis);
-            }
+    // 🍎 Essen updaten
+    if(data.essen){
+        let essen = document.querySelector(".essen");
+        essen.style.left = data.essen.x + "px";
+        essen.style.top = data.essen.y + "px";
+    }
+});
 
-            kreis.style.background = data.kreise[i].farbe;
-            kreis.style.left = data.kreise[i].x + "px";
-            kreis.style.top = data.kreise[i].y + "px";
-        }
-
-        // 🍎 Essen updaten
-        if(data.essen){
-            let essen = document.querySelector(".essen");
-            essen.style.left = data.essen.x + "px";
-            essen.style.top = data.essen.y + "px";
-        }
-
-    });
-
-}
-
-let speed = 200; // Startgeschwindigkeit
 
 function gameLoop(){
 
