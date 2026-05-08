@@ -1,230 +1,308 @@
-
 <!DOCTYPE html>
 <html>
 <head>
-    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
     <title>Snace</title>
 
     <style>
-        
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a0f3f 25%, #0f1a3f 50%, #0a0e27 75%, #000000 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            font-family: sans-serif;
+            position: relative;
+        }
 
-        body{
-    margin: 0;
-    overflow: hidden;
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(2px 2px at 20px 30px, #eee, rgba(0,0,0,.2)),
+                radial-gradient(2px 2px at 60px 70px, #fff, rgba(0,0,0,.3)),
+                radial-gradient(1px 1px at 50px 50px, #fff, rgba(0,0,0,.2)),
+                radial-gradient(1px 1px at 130px 80px, #fff, rgba(0,0,0,.2)),
+                radial-gradient(2px 2px at 90px 10px, #fff, rgba(0,0,0,.3));
+            background-repeat: repeat;
+            background-size: 200px 200px;
+            opacity: 0.5;
+            pointer-events: none;
+            z-index: 1;
+        }
 
-    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-}
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
 
-        .mehr_kreis{
-    position: absolute;
-    border-radius: 50%;
-    background: radial-gradient(circle at 30% 30%, #ff9afc, #ff00cc);
+        canvas#bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
 
-    box-shadow:
-        0 0 10px #ff00cc,
-        0 0 20px #ff00cc,
-        0 0 30px #ff00cc;
+        .mehr_kreis {
+            position: absolute;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #ffffff, currentColor 40%, #000 120%);
+            box-shadow:
+                0 0 8px currentColor,
+                0 0 20px currentColor,
+                0 0 40px currentColor,
+                inset 0 0 10px rgba(255,255,255,0.5);
+            transition: all 0.07s linear;
+            animation: snakePulse 0.6s infinite alternate;
+            z-index: 10;
+        }
 
-    transition: left 0.2s linear, top 0.2s linear;
-}
+        @keyframes snakePulse {
+            from { transform: scale(0.95); }
+            to   { transform: scale(1.05); }
+        }
 
-    #levelAnzeige{
-    position: absolute;
-    top: 20px;
-    left: 50%;
-    transform: translateX(-50%);
+        .kopf {
+            transform: scale(1.35);
+            z-index: 20;
+        }
 
-    font-size: 40px;
-    font-weight: bold;
+        .auge {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: white;
+            border-radius: 50%;
+        }
 
-    color: white;
+        .auge::after {
+            content: "";
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: black;
+            border-radius: 50%;
+            top: 3px;
+            left: 3px;
+        }
 
-    background: radial-gradient(circle at 30% 30%, #ff9afc, #ff00cc);
+        .essen {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #fff, #ff0000);
+            box-shadow:
+                0 0 15px red,
+                0 0 35px red,
+                0 0 70px red;
+            z-index: 10;
+        }
 
-    padding: 10px 25px;
-    border-radius: 20px;
+        #gameOver {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.5);
+            font-size: 90px;
+            font-weight: bold;
+            color: white;
+            display: none;
+            animation: gameOverAnim 1s forwards;
+            text-shadow:
+                0 0 30px red,
+                0 0 60px red,
+                0 0 100px red;
+            z-index: 100;
+        }
 
-    box-shadow:
-        0 0 10px #ff00cc,
-        0 0 20px #ff00cc,
-        0 0 40px #ff00cc;
+        body.game-over {
+            background: #000 !important;
+            animation: none !important;
+        }
 
-    text-shadow:
-        0 0 5px white,
-        0 0 10px #ff00cc;
-}
+        body.game-over::before {
+            opacity: 0 !important;
+        }
 
+        body.game-over .mehr_kreis,
+        body.game-over .essen,
+        body.game-over #warteAnzeige,
+        body.game-over #spielerAnzeige {
+            display: none !important;
+        }
 
-        .essen{
-    position: absolute;
-    width: 30px;
-    height: 30px;
-
-    background: radial-gradient(circle at 30% 30%, #ff4d4d, #b30000);
-    border-radius: 50%;
-
-    box-shadow:
-        0 0 10px red,
-        0 0 20px red;
-}
-
-
-
-
-        #gameOver{
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    
-    font-size: 60px;
-    font-weight: bold;
-    color: white;
-
-    text-shadow:
-        0 0 10px red,
-        0 0 20px red,
-        0 0 40px red;
-
-    display: none;
-}
+        @keyframes gameOverAnim {
+            to {
+                transform: translate(-50%, -50%) scale(1.3);
+            }
+        }
     </style>
 </head>
 
 <body>
 
 <div id="gameOver">GAME OVER</div>
+<div id="warteAnzeige">⏳ Warte auf grünen Spieler...</div>
+<div id="spielerAnzeige"></div>
 
 {% for k in kreise_für_render %}
 <div id="kreis{{ loop.index0 }}" class="mehr_kreis"
-     style="
-     width: {{k.durchmesser}}px;
-     height: {{k.durchmesser}}px;
-     background-color: {{k.farbe}};
-     left: {{k.x}}px;
-     top: {{k.y}}px;">
+     style="width: {{k.durchmesser}}px; height: {{k.durchmesser}}px; left: {{k.x}}px; top: {{k.y}}px;">
 </div>
 {% endfor %}
 
 <div class="essen"></div>
-<div class="apfel-stiel"></div>
-<div id="levelAnzeige">LEVEL 1</div>
 
+<!-- 🎵 Hintergrundmusik -->
+<audio id="bgmusik" loop>
+    <source src="musik.mp3" type="audio/mpeg">
+</audio>
+
+<script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
 <script>
-
 const socket = io();
-let speed = 200; 
-
-
-
-let spielfeldBreite = window.innerWidth;
-let spielfeldHoehe = window.innerHeight;
-
-let richtungSpieler1 = "right";
-let richtungSpieler2 = "down";
 let gameOver = false;
+let meineSpielerNummer = null;
 
-window.addEventListener("resize", () => {
-    spielfeldBreite = window.innerWidth;
-    spielfeldHoehe = window.innerHeight;
+socket.on('spieler_nummer', function(data) {
+    meineSpielerNummer = data.nummer;
+    const display = document.getElementById('spielerAnzeige');
+    if (display) {
+        if (data.nummer === 1) {
+            display.textContent = 'du bist gelb';
+        } else if (data.nummer === 2) {
+            display.textContent = 'du bist grün';
+        }
+        display.style.display = 'block';
+    }
 });
 
+socket.on('spiel_start', function() {
+    const waiting = document.getElementById('warteAnzeige');
+    if (waiting) {
+        waiting.textContent = 'Spiel gestartet!';
+    }
+});
+
+const musik = document.getElementById("bgmusik");
+musik.volume = 0.4;
+
+// 🔥 Versuch: sofort starten
+window.addEventListener("load", () => {
+    musik.play().catch(() => {
+        console.log("Autoplay blockiert → warte auf Taste");
+    });
+});
+
+// 🔥 Fallback: startet bei erster Taste (funktioniert IMMER)
+let musikGestartet = false;
+window.addEventListener("keydown", () => {
+    if (!musikGestartet) {
+        musik.play();
+        musikGestartet = true;
+    }
+});
 window.addEventListener("keydown", (event) => {
-    if (event.key === "w") richtungSpieler1 = "up";
-    if (event.key === "s") richtungSpieler1 = "down";
-    if (event.key === "a") richtungSpieler1 = "left";
-    if (event.key === "d") richtungSpieler1 = "right";
+    if (gameOver || !meineSpielerNummer) return;
 
-    if (event.key === "ArrowUp") richtungSpieler2 = "up";
-    if (event.key === "ArrowDown") richtungSpieler2 = "down";
-    if (event.key === "ArrowLeft") richtungSpieler2 = "left";
-    if (event.key === "ArrowRight") richtungSpieler2 = "right";
+    let richtung = null;
+
+    if (event.key === "w" || event.key === "ArrowUp") richtung = "up";
+    else if (event.key === "s" || event.key === "ArrowDown") richtung = "down";
+    else if (event.key === "a" || event.key === "ArrowLeft") richtung = "left";
+    else if (event.key === "d" || event.key === "ArrowRight") richtung = "right";
+
+    if (richtung) {
+        socket.emit("richtung", { richtung: richtung });
+    }
 });
 
+socket.on('zustand', function(data) {
 
-function bewegeSchlange(){
-
-    if(gameOver) return;
-
-socket.emit('move', {richtung1: richtungSpieler1, richtung2: richtungSpieler2, breite: spielfeldBreite, hoehe: spielfeldHoehe});
-
-}
-socket.on('update', function(data) {
-    let länge = data.kreise.length;
-    let level = 1;
-    if(länge >= 20){
-        speed = 70;
-        level = 5;
-    }
-    else if(länge >= 15){
-        speed = 100;
-        level = 4;
-    }
-    else if(länge >= 10){
-        speed = 130;
-        level = 3;
-    }
-    else if(länge >= 5){
-        speed = 170;
-        level = 2;
-    }
-    else{
-        speed = 200;
-        level = 1;
-    }
-    document.getElementById("levelAnzeige").innerText = "LEVEL " + level;
-
-    // 💀 Game Over
-    if(data.status === "game over"){
+    if (data.status === "game over") {
+        document.body.classList.add("game-over");
         document.getElementById("gameOver").style.display = "block";
+
+        // 🔇 Musik stoppen
+        document.getElementById("bgmusik").pause();
+
         gameOver = true;
         return;
     }
 
-    // 🟢 Kreise updaten
-    for(let i = 0; i < data.kreise.length; i++){
+    if (!data.kreise) return;
+
+    for (let i = 0; i < data.kreise.length; i++) {
+
         let kreis = document.getElementById("kreis" + i);
 
-        if(!kreis){
+        if (!kreis) {
             kreis = document.createElement("div");
             kreis.id = "kreis" + i;
             kreis.className = "mehr_kreis";
-            kreis.style.position = "absolute";
-            kreis.style.borderRadius = "50%";
-            kreis.style.width = data.kreise[i].durchmesser + "px";
-            kreis.style.height = data.kreise[i].durchmesser + "px";
             document.body.appendChild(kreis);
         }
 
-        kreis.style.background = data.kreise[i].farbe;
-        kreis.style.left = data.kreise[i].x + "px";
-        kreis.style.top = data.kreise[i].y + "px";
+        // 🐍 richtige Spielerfarben
+        if (data.kreise[i].farbe === "pink") {
+            kreis.style.background = "#E9967A";
+        } else if (data.kreise[i].farbe === "cyan") {
+            kreis.style.background = "#8FBC8F";
+        }
+
+        kreis.style.width  = data.kreise[i].durchmesser + "px";
+        kreis.style.height = data.kreise[i].durchmesser + "px";
+        kreis.style.left   = data.kreise[i].x + "px";
+        kreis.style.top    = data.kreise[i].y + "px";
+
+        // 👀 Kopf mit Augen
+        if (i === 0) {
+            kreis.classList.add("kopf");
+
+            if (!kreis.querySelector(".auge")) {
+                const auge1 = document.createElement("div");
+                const auge2 = document.createElement("div");
+
+                auge1.className = "auge";
+                auge2.className = "auge";
+
+                auge1.style.left = "10px";
+                auge1.style.top  = "10px";
+
+                auge2.style.left = "30px";
+                auge2.style.top  = "10px";
+
+                kreis.appendChild(auge1);
+                kreis.appendChild(auge2);
+            }
+        } else {
+            kreis.classList.remove("kopf");
+            kreis.innerHTML = "";
+        }
     }
 
-    // 🍎 Essen updaten
-    if(data.essen){
-        let essen = document.querySelector(".essen");
+    // alte Kreise löschen
+    let i = data.kreise.length;
+    while (document.getElementById("kreis" + i)) {
+        document.getElementById("kreis" + i).remove();
+        i++;
+    }
+
+    // 🍎 Essen
+    if (data.essen) {
+        const essen = document.querySelector(".essen");
         essen.style.left = data.essen.x + "px";
-        essen.style.top = data.essen.y + "px";
+        essen.style.top  = data.essen.y + "px";
     }
 });
-
-
-function gameLoop(){
-
-    if(gameOver) return;
-
-    bewegeSchlange();
-
-    setTimeout(gameLoop, speed);
-}
-
-// 👉 starten
-gameLoop();
-
-
 </script>
 
 </body>
 </html>
-

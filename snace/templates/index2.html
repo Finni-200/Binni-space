@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Snace</title>
+
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a0f3f 25%, #0f1a3f 50%, #0a0e27 75%, #000000 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            font-family: sans-serif;
+            position: relative;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(2px 2px at 20px 30px, #eee, rgba(0,0,0,.2)),
+                radial-gradient(2px 2px at 60px 70px, #fff, rgba(0,0,0,.3)),
+                radial-gradient(1px 1px at 50px 50px, #fff, rgba(0,0,0,.2)),
+                radial-gradient(1px 1px at 130px 80px, #fff, rgba(0,0,0,.2)),
+                radial-gradient(2px 2px at 90px 10px, #fff, rgba(0,0,0,.3));
+            background-repeat: repeat;
+            background-size: 200px 200px;
+            opacity: 0.5;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        canvas#bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        .mehr_kreis {
+            position: absolute;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #ffffff, currentColor 40%, #000 120%);
+            box-shadow:
+                0 0 8px currentColor,
+                0 0 20px currentColor,
+                0 0 40px currentColor,
+                inset 0 0 10px rgba(255,255,255,0.5);
+            transition: all 0.07s linear;
+            animation: snakePulse 0.6s infinite alternate;
+            z-index: 10;
+        }
+
+        @keyframes snakePulse {
+            from { transform: scale(0.95); }
+            to   { transform: scale(1.05); }
+        }
+
+        .kopf {
+            transform: scale(1.35);
+            z-index: 20;
+        }
+
+        .auge {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: white;
+            border-radius: 50%;
+        }
+
+        .auge::after {
+            content: "";
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: black;
+            border-radius: 50%;
+            top: 3px;
+            left: 3px;
+        }
+
+        .essen {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #fff, #ff0000);
+            box-shadow:
+                0 0 15px red,
+                0 0 35px red,
+                0 0 70px red;
+            z-index: 10;
+        }
+
+        #gameOver {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.5);
+            font-size: 90px;
+            font-weight: bold;
+            color: white;
+            display: none;
+            animation: gameOverAnim 1s forwards;
+            text-shadow:
+                0 0 30px red,
+                0 0 60px red,
+                0 0 100px red;
+            z-index: 100;
+        }
+
+        @keyframes gameOverAnim {
+            to {
+                transform: translate(-50%, -50%) scale(1.3);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div id="gameOver">GAME OVER</div>
+
+{% for k in kreise_für_render %}
+<div id="kreis{{ loop.index0 }}" class="mehr_kreis"
+     style="width: {{k.durchmesser}}px; height: {{k.durchmesser}}px; left: {{k.x}}px; top: {{k.y}}px;">
+</div>
+{% endfor %}
+
+<div class="essen" style="left: {{essen_x}}px; top: {{essen_y}}px;"></div>
+
+<!-- 🎵 Hintergrundmusik -->
+<audio id="bgmusik" loop>
+    <source src="musik.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+// Spielfeld-Dimensionen
+const SPIEL_BREITE = 1200;
+const SPIEL_HOEHE = 800;
+const DURCHMESSER = 50;
+
+// Spieler-Daten (lokal)
+let spieler1 = {
+    body: [
+        {x: 600, y: 500},
+        {x: 550, y: 500}
+    ],
+    richtung: "right",
+    farbe: "pink"
+};
+
+let spieler2 = {
+    body: [
+        {x: 300, y: 200},
+        {x: 300, y: 250}
+    ],
+    richtung: "up",
+    farbe: "cyan"
+};
+
+let essen = {
+    x: Math.random() * (SPIEL_BREITE - 10),
+    y: Math.random() * (SPIEL_HOEHE - 10)
+};
+
+let gameOver = false;
+let neue_richtung_spieler1 = "right";
+let neue_richtung_spieler2 = "up";
+
+const musik = document.getElementById("bgmusik");
+musik.volume = 0.4;
+
+// Musik starten
+window.addEventListener("load", () => {
+    musik.play().catch(() => {
+        console.log("Autoplay blockiert → warte auf Taste");
+    });
+});
+
+let musikGestartet = false;
+window.addEventListener("keydown", () => {
+    if (!musikGestartet) {
+        musik.play();
+        musikGestartet = true;
+    }
+});
+
+// Tastatureingaben - Spieler 1: WASD, Spieler 2: Pfeiltasten
+window.addEventListener("keydown", (event) => {
+    if (gameOver) return;
+
+    if (event.key === "w" || event.key === "W") neue_richtung_spieler1 = "up";
+    else if (event.key === "s" || event.key === "S") neue_richtung_spieler1 = "down";
+    else if (event.key === "a" || event.key === "A") neue_richtung_spieler1 = "left";
+    else if (event.key === "d" || event.key === "D") neue_richtung_spieler1 = "right";
+    
+    if (event.key === "ArrowUp") neue_richtung_spieler2 = "up";
+    else if (event.key === "ArrowDown") neue_richtung_spieler2 = "down";
+    else if (event.key === "ArrowLeft") neue_richtung_spieler2 = "left";
+    else if (event.key === "ArrowRight") neue_richtung_spieler2 = "right";
+});
+
+// Richtung validieren (nicht rückwärts fahren)
+function isValidDirection(player, newDir) {
+    const OPPOSITE = {
+        "up": "down",
+        "down": "up",
+        "left": "right",
+        "right": "left"
+    };
+    return OPPOSITE[newDir] !== player.richtung;
+}
+
+// Spieler bewegen
+function movePlayer(player, newDir) {
+    if (!isValidDirection(player, newDir)) return;
+    player.richtung = newDir;
+    
+    let kopf = player.body[0];
+    let neuer_x = kopf.x;
+    let neuer_y = kopf.y;
+    
+    if (player.richtung === "right") neuer_x += DURCHMESSER;
+    else if (player.richtung === "left") neuer_x -= DURCHMESSER;
+    else if (player.richtung === "up") neuer_y -= DURCHMESSER;
+    else if (player.richtung === "down") neuer_y += DURCHMESSER;
+    
+    // Grenzen wrappen
+    if (neuer_x >= SPIEL_BREITE) neuer_x = 0;
+    else if (neuer_x < 0) neuer_x = SPIEL_BREITE - DURCHMESSER;
+    
+    if (neuer_y >= SPIEL_HOEHE) neuer_y = 0;
+    else if (neuer_y < 0) neuer_y = SPIEL_HOEHE - DURCHMESSER;
+    
+    // Neuer Kopf
+    let alt_x = kopf.x;
+    let alt_y = kopf.y;
+    kopf.x = neuer_x;
+    kopf.y = neuer_y;
+    
+    // Body verschieben
+    for (let i = 1; i < player.body.length; i++) {
+        let temp_x = player.body[i].x;
+        let temp_y = player.body[i].y;
+        player.body[i].x = alt_x;
+        player.body[i].y = alt_y;
+        alt_x = temp_x;
+        alt_y = temp_y;
+    }
+    
+    // Essen gefressen?
+    if (Math.abs(kopf.x - essen.x) < 50 && Math.abs(kopf.y - essen.y) < 50) {
+        player.body.push({x: alt_x, y: alt_y});
+        essen.x = Math.random() * (SPIEL_BREITE - 10);
+        essen.y = Math.random() * (SPIEL_HOEHE - 10);
+    }
+}
+
+// Kollisionen prüfen
+function checkCollisions() {
+    let kopf1 = spieler1.body[0];
+    let kopf2 = spieler2.body[0];
+    
+    // Spieler 1 mit sich selbst
+    for (let i = 1; i < spieler1.body.length; i++) {
+        if (kopf1.x === spieler1.body[i].x && kopf1.y === spieler1.body[i].y) {
+            return "game_over";
+        }
+    }
+    
+    // Spieler 2 mit sich selbst
+    for (let i = 1; i < spieler2.body.length; i++) {
+        if (kopf2.x === spieler2.body[i].x && kopf2.y === spieler2.body[i].y) {
+            return "game_over";
+        }
+    }
+    
+    // Beide Köpfe treffen sich → Game Over
+    if (kopf1.x === kopf2.x && kopf1.y === kopf2.y) {
+        return "game_over";
+    }
+    
+    // Spieler 1 Kopf trifft Spieler 2 Körper (nicht Kopf)
+    for (let i = 1; i < spieler2.body.length; i++) {
+        if (kopf1.x === spieler2.body[i].x && kopf1.y === spieler2.body[i].y) {
+            // Spieler 2 wird auf 2 Segmente zurückgesetzt
+            let verloren_segmente = spieler2.body.length;
+            spieler2.body = [
+                {x: 300, y: 200},
+                {x: 300, y: 250}
+            ];
+            // Spieler 1 wächst um die verlorenen Segmente
+            for (let j = 0; j < verloren_segmente - 2; j++) {
+                let letztes = spieler1.body[spieler1.body.length - 1];
+                spieler1.body.push({x: letztes.x, y: letztes.y});
+            }
+            return "continue";
+        }
+    }
+    
+    // Spieler 2 Kopf trifft Spieler 1 Körper (nicht Kopf)
+    for (let i = 1; i < spieler1.body.length; i++) {
+        if (kopf2.x === spieler1.body[i].x && kopf2.y === spieler1.body[i].y) {
+            // Spieler 1 wird auf 2 Segmente zurückgesetzt
+            let verloren_segmente = spieler1.body.length;
+            spieler1.body = [
+                {x: 600, y: 500},
+                {x: 550, y: 500}
+            ];
+            // Spieler 2 wächst um die verlorenen Segmente
+            for (let j = 0; j < verloren_segmente - 2; j++) {
+                let letztes = spieler2.body[spieler2.body.length - 1];
+                spieler2.body.push({x: letztes.x, y: letztes.y});
+            }
+            return "continue";
+        }
+    }
+    
+    return "continue";
+}
+
+// Alle Kreise rendern
+function renderGame() {
+    let all_kreise = [...spieler1.body, ...spieler2.body];
+    
+    for (let i = 0; i < all_kreise.length; i++) {
+        let kreis_el = document.getElementById("kreis" + i);
+        if (!kreis_el) {
+            kreis_el = document.createElement("div");
+            kreis_el.id = "kreis" + i;
+            kreis_el.className = "mehr_kreis";
+            document.body.appendChild(kreis_el);
+        }
+        
+        let k = all_kreise[i];
+        kreis_el.style.left = k.x + "px";
+        kreis_el.style.top = k.y + "px";
+        kreis_el.style.width = DURCHMESSER + "px";
+        kreis_el.style.height = DURCHMESSER + "px";
+        
+        // Farbe setzen
+        if (i < spieler1.body.length) {
+            kreis_el.style.background = spieler1.farbe === "pink" 
+                ? "radial-gradient(circle at 30% 30%, #E9967A, #E9967A)" 
+                : "radial-gradient(circle at 30% 30%, #ffffff, currentColor 40%, #000 120%)";
+        } else {
+            kreis_el.style.background = spieler2.farbe === "cyan"
+                ? "radial-gradient(circle at 30% 30%, #8FBC8F, #8FBC8F)"
+                : "radial-gradient(circle at 30% 30%, #ffffff, currentColor 40%, #000 120%)";
+        }
+        
+        // Kopf markieren
+        if (i === 0 || i === spieler1.body.length) {
+            kreis_el.classList.add("kopf");
+            
+            if (!kreis_el.querySelector(".auge")) {
+                const auge1 = document.createElement("div");
+                const auge2 = document.createElement("div");
+                auge1.className = "auge";
+                auge2.className = "auge";
+                auge1.style.left = "10px";
+                auge1.style.top = "10px";
+                auge2.style.left = "30px";
+                auge2.style.top = "10px";
+                kreis_el.appendChild(auge1);
+                kreis_el.appendChild(auge2);
+            }
+        } else {
+            kreis_el.classList.remove("kopf");
+            kreis_el.innerHTML = "";
+        }
+    }
+    
+    // Essen rendern
+    let essen_el = document.querySelector(".essen");
+    essen_el.style.left = essen.x + "px";
+    essen_el.style.top = essen.y + "px";
+}
+
+// Game Loop
+let speed = 0.2;
+
+setInterval(() => {
+    if (gameOver) return;
+    
+    // Geschwindigkeit adjustieren
+    let länge = spieler1.body.length + spieler2.body.length;
+    if (länge >= 20) speed = 0.07;
+    else if (länge >= 15) speed = 0.10;
+    else if (länge >= 10) speed = 0.13;
+    else if (länge >= 5) speed = 0.17;
+    else speed = 0.20;
+    
+    // Spieler bewegen
+    movePlayer(spieler1, neue_richtung_spieler1);
+    movePlayer(spieler2, neue_richtung_spieler2);
+    
+    // Kollisionen
+    let collision_result = checkCollisions();
+    if (collision_result === "game_over") {
+        gameOver = true;
+        document.getElementById("gameOver").style.display = "block";
+        document.getElementById("bgmusik").pause();
+        return;
+    }
+    
+    // Rendern
+    renderGame();
+}, 200);
+
+// Initial render
+renderGame();
+</script>
+</html>
