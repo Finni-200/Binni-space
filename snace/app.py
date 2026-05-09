@@ -35,10 +35,10 @@ def eat_body(attacker, victim):
     if lost_segments <= 0:
         return
 
-    # zurücksetzen auf zwei Segmente
+
     victim.body = victim.body[:2]
 
-    # Angreifer wächst um die verlorenen Segmente
+
     last_segment = attacker.body[-1]
     for _ in range(lost_segments):
         attacker.body.append(körperteil(attacker.farbe, attacker.durchmesser, last_segment.x, last_segment.y))
