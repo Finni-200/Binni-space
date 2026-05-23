@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Snake Lokal</title>
-
+    <title>Snake</title>
     <style>
         body {
             margin: 0;
@@ -31,76 +30,48 @@
     </style>
 </head>
 <body>
-
 <script>
-    const GRID = 50;
-    const SPEED = 150;
+const GRID = 50, SPEED = 150;
+let richtung = "right";
+let snake = [{x: 300, y: 300}, {x: 250, y: 300}, {x: 200, y: 300}];
 
-    let richtung = "right";
-
-    let snake = [
-        { x: 300, y: 300 },
-        { x: 250, y: 300 },
-        { x: 200, y: 300 }
-    ];
-
-    function render() {
-        document.querySelectorAll(".segment").forEach(el => el.remove());
-
-        for (let i = 0; i < snake.length; i++) {
-            const teil = snake[i];
-            const div = document.createElement("div");
-
-            div.className = "segment";
-            if (i === 0) {
-                div.classList.add("kopf");
-            }
-
-            div.style.left = teil.x + "px";
-            div.style.top = teil.y + "px";
-
-            document.body.appendChild(div);
-        }
-    }
-
-    function move() {
-        const kopf = { ...snake[0] };
-
-        if (richtung === "right") kopf.x += GRID;
-        if (richtung === "left")  kopf.x -= GRID;
-        if (richtung === "up")    kopf.y -= GRID;
-        if (richtung === "down")  kopf.y += GRID;
-
-        // Bildschirmrand auf andere Seite
-        if (kopf.x >= window.innerWidth) kopf.x = 0;
-        if (kopf.x < 0) kopf.x = window.innerWidth - GRID;
-        if (kopf.y >= window.innerHeight) kopf.y = 0;
-        if (kopf.y < 0) kopf.y = window.innerHeight - GRID;
-
-        snake.unshift(kopf);
-        snake.pop();
-
-        render();
-    }
-
-    window.addEventListener("keydown", (event) => {
-        if (event.key === "ArrowUp" && richtung !== "down") {
-            richtung = "up";
-        }
-        else if (event.key === "ArrowDown" && richtung !== "up") {
-            richtung = "down";
-        }
-        else if (event.key === "ArrowLeft" && richtung !== "right") {
-            richtung = "left";
-        }
-        else if (event.key === "ArrowRight" && richtung !== "left") {
-            richtung = "right";
-        }
+function render() {
+    document.querySelectorAll(".segment").forEach(el => el.remove());
+    snake.forEach((teil, i) => {
+        const div = document.createElement("div");
+        div.className = i === 0 ? "segment kopf" : "segment";
+        div.style.left = teil.x + "px";
+        div.style.top = teil.y + "px";
+        document.body.appendChild(div);
     });
+}
 
+function move() {
+    const kopf = {...snake[0]};
+    if (richtung === "right") kopf.x += GRID;
+    else if (richtung === "left") kopf.x -= GRID;
+    else if (richtung === "up") kopf.y -= GRID;
+    else if (richtung === "down") kopf.y += GRID;
+
+    if (kopf.x >= window.innerWidth) kopf.x = 0;
+    else if (kopf.x < 0) kopf.x = window.innerWidth - GRID;
+    if (kopf.y >= window.innerHeight) kopf.y = 0;
+    else if (kopf.y < 0) kopf.y = window.innerHeight - GRID;
+
+    snake.unshift(kopf);
+    snake.pop();
     render();
-    setInterval(move, SPEED);
-</script>
+}
 
+window.addEventListener("keydown", e => {
+    if (e.key === "ArrowUp" && richtung !== "down") richtung = "up";
+    else if (e.key === "ArrowDown" && richtung !== "up") richtung = "down";
+    else if (e.key === "ArrowLeft" && richtung !== "right") richtung = "left";
+    else if (e.key === "ArrowRight" && richtung !== "left") richtung = "right";
+});
+
+render();
+setInterval(move, SPEED);
+</script>
 </body>
 </html>
