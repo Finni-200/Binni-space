@@ -9,20 +9,20 @@ app = Flask(__name__, template_folder="temlates", static_folder="static")
 # Globale Konfiguration der Schlange.
 # Hier kannst du Werte wie speed direkt in app.py sehen und ändern.
 snake = Snace(
-    x_1=300,
-    y=100,
+    x_1=500,
+    y=500,
     farbe="red",
-    farbe_1="black",
+    farbe_1="green",
     durchmesser=50,
-    anzahl=3,
-    speed=100
+    anzahl=4,
+    wartezeit=100
 )
 
 
 def move_snake_loop():
-    """Bewegt die Schlange im Hintergrund alle x Millisekunden."""
+    #Bewegt die Schlange im Hintergrund alle x Millisekunden
     while True:
-        time.sleep(snake.speed() / 1000)
+        time.sleep(snake.wartezeit / 1000)
         snake.move()
 
 
@@ -35,9 +35,9 @@ thread.start()
 
 @app.route("/")
 def index():
-    # Gibt die HTML-Seite zurück. Die Seite lädt die aktuellen Kreisdaten per API.
+
     snake_data = {
-        "speed": snake.speed(),
+        "speed": snake.wartezeit,
         "diameter": snake.durchmesser,
         "count": len(snake.liste),
     }

@@ -3,8 +3,8 @@ from kreise import Kreise
 
 class Snace:
 
-    def __init__(self, x_1, y, farbe, farbe_1, durchmesser, anzahl, speed):
-        self._speed = speed
+    def __init__(self, x_1, y, farbe, farbe_1, durchmesser, anzahl, wartezeit):
+        self.wartezeit = wartezeit
         self.durchmesser = durchmesser
 
         # Erzeuge die Startliste der Kreise für die Schlange.
@@ -13,10 +13,6 @@ class Snace:
             x = x_1 - i * durchmesser
             color = farbe_1 if i == 0 else farbe
             self.liste.append(Kreise(color, durchmesser, x, y))
-
-    def speed(self):
-        # Liefert den Wert für das Animationstempo zurück.
-        return self._speed
 
     def move(self):
         # Bewege den Kopf und lasse den Körper nachziehen.
@@ -38,6 +34,14 @@ class Snace:
 
             alt_x = temp_x
             alt_y = temp_y
+
+
+    def wand_kolision(self):
+        # Überprüft, ob der Kopf mit dem rand des bilsdschirms kollidiert.
+        kopf = self.liste[0]
+        if kopf.x < 0 or kopf.x > 1000 or kopf.y < 0 or kopf.y > 1000:
+            return True
+        return False
 
     def get_kreise(self):
         # Wandelt die Liste der Kreis-Objekte in einfache Dictionary-Daten um.
