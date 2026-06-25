@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Snace Visualisierung</title>
+
   <style>
     html, body {
       width: 100%;
@@ -12,9 +13,11 @@
       overflow: hidden;
       background: #111;
     }
+
     body {
       display: flex;
     }
+
     svg {
       width: 100vw;
       height: 100vh;
@@ -23,14 +26,23 @@
     }
   </style>
 </head>
+
 <body>
+
   <svg id="field" xmlns="http://www.w3.org/2000/svg">
     {% for c in circles %}
-      <circle id="circle-{{ loop.index0 }}" cx="{{ c.cx }}" cy="{{ c.cy }}" r="{{ c.r }}" fill="{{ c.color }}" stroke="#222" />
+      <circle
+        id="circle-{{ loop.index0 }}"
+        cx="{{ c.cx }}"
+        cy="{{ c.cy }}"
+        r="{{ c.r }}"
+        fill="{{ c.color }}"
+        stroke="#222"
+      />
     {% endfor %}
   </svg>
 
-  <script id="snake-data" type="application/json">{{ snake_data|tojson }}</script>
   <script src="{{ url_for('static', filename='snace.js') }}"></script>
+
 </body>
 </html>

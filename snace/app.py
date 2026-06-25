@@ -3,11 +3,8 @@ from snace import Snace
 import threading
 import time
 
+app = Flask(__name__, template_folder="templates", static_folder="static")
 
-app = Flask(__name__, template_folder="temlates", static_folder="static")
-
-# Globale Konfiguration der Schlange.
-# Hier kannst du Werte wie speed direkt in app.py sehen und ändern.
 snake = Snace(
     x_1=500,
     y=500,
@@ -15,15 +12,16 @@ snake = Snace(
     farbe_1="green",
     durchmesser=50,
     anzahl=4,
-    wartezeit=100
+    wartezeit=1000
 )
+
+current_direction = "right"
 
 
 def move_snake_loop():
-    #Bewegt die Schlange im Hintergrund alle x Millisekunden
     while True:
         time.sleep(snake.wartezeit / 1000)
-        snake.move()
+        snake.move(current_direction)
 
 
 thread = threading.Thread(
@@ -35,20 +33,23 @@ thread.start()
 
 @app.route("/")
 def index():
-
-    snake_data = {
-        "speed": snake.wartezeit,
-        "diameter": snake.durchmesser,
-        "count": len(snake.liste),
-    }
-    circles = snake.get_kreise()
-    return render_template("index.html", circles=circles, snake_data=snake_data)
+    return render_template("index.html", circles=snake.get_kreise())
 
 
 @app.route("/api/snake")
 def api_snake():
-    # Liefert die aktuellen Positionen der Kreise als JSON für das Frontend.
     return jsonify(snake.get_kreise())
+
+
+@app.route("/richtung/<richtung>")
+def richtung(richtung):
+
+    global current_direction
+
+    if richtung in ["up", "down", "left", "right"]:
+        current_direction = richtung
+
+    return jsonify({"richtung": current_direction})
 
 
 if __name__ == "__main__":
