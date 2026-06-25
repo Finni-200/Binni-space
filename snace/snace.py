@@ -14,26 +14,43 @@ class Snace:
             color = farbe_1 if i == 0 else farbe
             self.liste.append(Kreise(color, durchmesser, x, y))
 
-    def move(self):
-        # Bewege den Kopf und lasse den Körper nachziehen.
-        kopf = self.liste[0]
+    def move(self, direction):
+        # Bewegt die Schlange in die angegebene Richtung.
+        self.direction = direction
+        if self.direction == 'right':
+            for kreis in self.liste:
+                kreis.x += 50
 
-        alt_x = kopf.x
-        alt_y = kopf.y
+        if self.direction == 'left':
+            for kreis in self.liste:
+                kreis.x -= 50
 
-        # Kopf um einen Kreis nach rechts verschieben.
-        kopf.x += self.durchmesser
+        if self.direction == 'up':
+            for kreis in self.liste:
+                kreis.y -= 50
 
-        # Körpersegmente folgen der alten Position des vorherigen Segments.
-        for i in range(1, len(self.liste)):
-            temp_x = self.liste[i].x
-            temp_y = self.liste[i].y
+        if self.direction == 'down':
+            for kreis in self.liste:
+                kreis.y += 50
 
-            self.liste[i].x = alt_x
-            self.liste[i].y = alt_y
+    
+    
+    if self.direction == 'right':
+    for kreis in self.liste:
+        kreis.x += 50
 
-            alt_x = temp_x
-            alt_y = temp_y
+    if self.direction == 'left':
+    for kreis in self.liste:
+        kreis.x -= 50
+  
+    if self.direction == 'up':
+    for kreis in self.liste:
+        kreis.y += 50
+
+    if self.direction == 'down':
+    for kreis in self.liste:
+        kreis.y -= 50
+
 
 
     def wand_kolision(self):
