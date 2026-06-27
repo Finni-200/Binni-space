@@ -52,5 +52,12 @@ def richtung(richtung):
     return jsonify({"richtung": current_direction})
 
 
+@app.route("/fenster/<int:width>/<int:height>")
+def fenster(width, height):
+    snake.width = width
+    snake.height = height
+    return jsonify({"width": snake.width, "height": snake.height})
+
+
 if __name__ == "__main__":
     app.run(debug=True)

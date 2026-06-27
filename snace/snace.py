@@ -6,6 +6,9 @@ class Snace:
     def __init__(self, x_1, y, farbe, farbe_1, durchmesser, anzahl, wartezeit):
         self.wartezeit = wartezeit
         self.durchmesser = durchmesser
+        self.anzahl = anzahl
+        self.width = 1000
+        self.height = 1000
 
         # Erzeuge die Startliste der Kreise für die Schlange.
         self.liste = []
@@ -19,23 +22,28 @@ class Snace:
 
     def move(self, direction):
 
-        kreis.x = self.liste[0].x
-        kreis.y = self.liste[0].y
-    
-        for kreis in self.liste:
-    
-            if direction == "right":
-                kreis.x += 50
-    
-            elif direction == "left":
-                kreis.x -= 50
-    
-            elif direction == "up":
-                kreis.y -= 50
-    
-            elif direction == "down":
-                kreis.y += 50
+        for i in range(self.anzahl - 1, 0, -1):
+            self.liste[i].x = self.liste[i - 1].x
+            self.liste[i].y = self.liste[i - 1].y
 
+        if direction == "up":
+            self.liste[0].y -= self.durchmesser
+        elif direction == "down":
+            self.liste[0].y += self.durchmesser
+        elif direction == "left":
+            self.liste[0].x -= self.durchmesser
+        elif direction == "right":
+            self.liste[0].x += self.durchmesser
+
+        if self.liste[0].x < 0:
+            self.liste[0].x = self.width
+        elif self.liste[0].x > self.width:
+            self.liste[0].x = 0
+
+        if self.liste[0].y < 0:
+            self.liste[0].y = self.height
+        elif self.liste[0].y > self.height:
+            self.liste[0].y = 0
     
     def get_kreise(self):
         # Wandelt die Liste der Kreis-Objekte in einfache Dictionary-Daten um.
