@@ -6,8 +6,8 @@ import time
 app = Flask(__name__, template_folder="templates", static_folder="static")
 
 snake = Snace(
-    x_1=500,
-    y=500,
+    x_1=950,
+    y=450,
     farbe="red",
     farbe_1="green",
     durchmesser=50,

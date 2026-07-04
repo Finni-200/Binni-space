@@ -29,7 +29,13 @@
 
 <body>
 
-  <svg id="field" xmlns="http://www.w3.org/2000/svg">
+  <svg id="field" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 2000">
+    <!-- Spielfeld Hintergrund -->
+    <rect x="0" y="0" width="1500" height="900" fill="#000"/>
+    <!-- Spielfeld Randlinien -->
+    <rect x="0" y="0" width="1900" height="900" fill="none" stroke="#ff0000" stroke-width="10"/>
+    
+    <!-- Schlange -->
     {% for c in circles %}
       <circle
         id="circle-{{ loop.index0 }}"
@@ -37,7 +43,7 @@
         cy="{{ c.cy }}"
         r="{{ c.r }}"
         fill="{{ c.color }}"
-        stroke="#222"
+        stroke="none"
       />
     {% endfor %}
   </svg>
