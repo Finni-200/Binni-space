@@ -3,12 +3,12 @@ from kreise import Kreise
 
 class Snace:
 
-    def __init__(self, x_1, y, farbe, farbe_1, durchmesser, anzahl, wartezeit):
+    def __init__(self, x_1, y, farbe, farbe_1, durchmesser, anzahl, wartezeit,width=1500,height=900):
         self.wartezeit = wartezeit
         self.durchmesser = durchmesser
         self.anzahl = anzahl
-        self.width = 1500
-        self.height = 900
+        self.width = width
+        self.height = height
 
         # Erzeuge die Startliste der Kreise für die Schlange.
         self.liste = []

@@ -5,15 +5,28 @@ import time
 
 app = Flask(__name__, template_folder="templates", static_folder="static")
 
+# Einfach änderbare Werte für das Spielfeld
+MARGIN_LEFT = 50
+MARGIN_TOP = 50
+MARGIN_RIGHT = 50
+MARGIN_BOTTOM = 50
+FIELD_WIDTH = 1000
+FIELD_HEIGHT = 600
+LINE_COLOR = "#ff0000"
+LINE_WIDTH = 4
+
 snake = Snace(
-    x_1=950,
-    y=450,
+    x_1=100,
+    y=100,
     farbe="red",
     farbe_1="green",
     durchmesser=50,
     anzahl=4,
-    wartezeit=1000
+    wartezeit=1000,
+    width=FIELD_WIDTH,
+    height=FIELD_HEIGHT
 )
+
 
 current_direction = "right"
 
@@ -33,7 +46,18 @@ thread.start()
 
 @app.route("/")
 def index():
-    return render_template("index.html", circles=snake.get_kreise())
+    return render_template(
+        "index.html",
+        circles=snake.get_kreise(),
+        margin_left=MARGIN_LEFT,
+        margin_top=MARGIN_TOP,
+        margin_right=MARGIN_RIGHT,
+        margin_bottom=MARGIN_BOTTOM,
+        field_width=FIELD_WIDTH,
+        field_height=FIELD_HEIGHT,
+        line_color=LINE_COLOR,
+        line_width=LINE_WIDTH,
+    )
 
 
 @app.route("/api/snake")

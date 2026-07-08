@@ -29,26 +29,23 @@
 
 <body>
 
-  <svg id="field" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 2000">
-    <!-- Spielfeld Hintergrund -->
-    <rect x="0" y="0" width="1500" height="900" fill="#000"/>
-    <!-- Spielfeld Randlinien -->
-    <rect x="0" y="0" width="1900" height="900" fill="none" stroke="#ff0000" stroke-width="10"/>
-    
-    <!-- Schlange -->
-    {% for c in circles %}
-      <circle
-        id="circle-{{ loop.index0 }}"
-        cx="{{ c.cx }}"
-        cy="{{ c.cy }}"
-        r="{{ c.r }}"
-        fill="{{ c.color }}"
-        stroke="none"
-      />
-    {% endfor %}
+  <svg id="field" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {{ field_width + margin_left + margin_right }} {{ field_height + margin_top + margin_bottom }}">
+    <rect x="{{ margin_left }}" y="{{ margin_top }}" width="{{ field_width }}" height="{{ field_height }}" fill="none" stroke="{{ line_color }}" stroke-width="{{ line_width }}"/>
+    {% if circles is defined %}
+      {% for c in circles %}
+        <circle
+          id="circle-{{ loop.index0 }}"
+          cx="{{ c.cx }}"
+          cy="{{ c.cy }}"
+          r="{{ c.r }}"
+          fill="{{ c.color }}"
+          stroke="none"
+        />
+      {% endfor %}
+    {% endif %}
   </svg>
 
-  <script src="{{ url_for('static', filename='snace.js') }}"></script>
+  
 
 </body>
 </html>

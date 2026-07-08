@@ -1,14 +1,17 @@
 const svg = document.getElementById('field');
 
+
+
+
 async function updateViewport() {
-    const width = window.innerWidth;
-    const height = window.innerHeight;
+	const width = window.innerWidth;
+	const height = window.innerHeight;
 
-    svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
-    svg.setAttribute('width', width);
-    svg.setAttribute('height', height);
+	svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+	svg.setAttribute('width', width);
+	svg.setAttribute('height', height);
 
-    await fetch(`/fenster/${Math.round(width)}/${Math.round(height)}`);
+	await fetch(`/fenster/${Math.round(width)}/${Math.round(height)}`);
 }
 
 window.addEventListener('resize', updateViewport);
@@ -17,27 +20,27 @@ updateViewport();
 // Tastatur
 document.addEventListener("keydown", async function(event){
 
-    let richtung = null;
+	let richtung = null;
 
-    if(event.key === "ArrowUp"){
-        richtung = "up";
-    }
+	if(event.key === "ArrowUp"){
+		richtung = "up";
+	}
 
-    else if(event.key === "ArrowDown"){
-        richtung = "down";
-    }
+	else if(event.key === "ArrowDown"){
+		richtung = "down";
+	}
 
-    else if(event.key === "ArrowLeft"){
-        richtung = "left";
-    }
+	else if(event.key === "ArrowLeft"){
+		richtung = "left";
+	}
 
-    else if(event.key === "ArrowRight"){
-        richtung = "right";
-    }
+	else if(event.key === "ArrowRight"){
+		richtung = "right";
+	}
 
-    if(richtung){
-        await fetch("/richtung/" + richtung);
-    }
+	if(richtung){
+		await fetch("/richtung/" + richtung);
+	}
 
 });
 
@@ -45,45 +48,46 @@ document.addEventListener("keydown", async function(event){
 // Schlange aktualisieren
 setInterval(async () => {
 
-    try {
+	try {
 
-        const response = await fetch("/api/snake");
-        const circles = await response.json();
-        const width = window.innerWidth;
-        const height = window.innerHeight;
+		const response = await fetch("/api/snake");
+		const circles = await response.json();
+		const width = window.innerWidth;
+		const height = window.innerHeight;
 
-        circles.forEach((circle, index) => {
+		circles.forEach((circle, index) => {
 
-            let elem = document.getElementById(`circle-${index}`);
+			let elem = document.getElementById(`circle-${index}`);
 
-            if (!elem) {
+			if (!elem) {
 
-                elem = document.createElementNS(
-                    "http://www.w3.org/2000/svg",
-                    "circle"
-                );
+				elem = document.createElementNS(
+					"http://www.w3.org/2000/svg",
+					"circle"
+				);
 
-                elem.setAttribute("id", `circle-${index}`);
-                elem.setAttribute("fill", circle.color);
-                elem.setAttribute("stroke", "#222");
+				elem.setAttribute("id", `circle-${index}`);
+				elem.setAttribute("fill", circle.color);
+				elem.setAttribute("stroke", "#222");
 
-                svg.appendChild(elem);
-            }
+				svg.appendChild(elem);
+			}
 
-            const radius = circle.r || 0;
-            const cx = Math.max(radius, Math.min(width - radius, circle.cx));
-            const cy = Math.max(radius, Math.min(height - radius, circle.cy));
+			const radius = circle.r || 0;
+			const cx = Math.max(radius, Math.min(width - radius, circle.cx));
+			const cy = Math.max(radius, Math.min(height - radius, circle.cy));
 
-            elem.setAttribute("cx", cx);
-            elem.setAttribute("cy", cy);
-            elem.setAttribute("r", radius);
+			elem.setAttribute("cx", cx);
+			elem.setAttribute("cy", cy);
+			elem.setAttribute("r", radius);
 
-        });
+		});
 
-    } catch (error) {
+	} catch (error) {
 
-        console.error(error);
+		console.error(error);
 
-    }
+	}
 
 }, 100);
+
