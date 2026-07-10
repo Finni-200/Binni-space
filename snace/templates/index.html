@@ -1,51 +1,58 @@
 <!doctype html>
 <html lang="de">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Snace Visualisierung</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <style>
-    html, body {
-      width: 100%;
-      height: 100%;
-      margin: 0;
-      overflow: hidden;
-      background: #111;
-    }
+    <title>Snace</title>
 
-    body {
-      display: flex;
-    }
+    <style>
+        html, body{
+            width:100%;
+            height:100%;
+            margin:0;
+            overflow:hidden;
+            background:#111;
+        }
 
-    svg {
-      width: 100vw;
-      height: 100vh;
-      display: block;
-      background: #000;
-    }
-  </style>
+        svg{
+            width:100vw;
+            height:100vh;
+            display:block;
+            background:#000;
+        }
+    </style>
 </head>
 
 <body>
 
-  <svg id="field" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {{ field_width + margin_left + margin_right }} {{ field_height + margin_top + margin_bottom }}">
-    <rect x="{{ margin_left }}" y="{{ margin_top }}" width="{{ field_width }}" height="{{ field_height }}" fill="none" stroke="{{ line_color }}" stroke-width="{{ line_width }}"/>
-    {% if circles is defined %}
-      {% for c in circles %}
-        <circle
-          id="circle-{{ loop.index0 }}"
-          cx="{{ c.cx }}"
-          cy="{{ c.cy }}"
-          r="{{ c.r }}"
-          fill="{{ c.color }}"
-          stroke="none"
-        />
-      {% endfor %}
-    {% endif %}
-  </svg>
+<svg
+    id="field"
+    xmlns="http://www.w3.org/2000/svg"
+    width="100%"
+    height="100%">
 
-  
+    <rect
+        id="spielfeld"
+        x="{{ spielrand }}"
+        y="{{ spielrand }}"
+        fill="none"
+        stroke="{{ line_color }}"
+        stroke-width="{{ line_width }}" />
+
+    {% for c in circles %}
+    <circle
+        id="circle-{{ loop.index0 }}"
+        cx="{{ c.cx }}"
+        cy="{{ c.cy }}"
+        r="{{ c.r }}"
+        fill="{{ c.color }}"
+        stroke="none"/>
+    {% endfor %}
+
+</svg>
+
+<script src="{{ url_for('static', filename='script.js') }}"></script>
 
 </body>
 </html>
