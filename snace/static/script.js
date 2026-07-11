@@ -1,19 +1,47 @@
 const svg = document.getElementById("field");
 const SPIELRAND = 50;
+const DURCHMESSER = 50;
 
-function updateViewport() {
+let fieldWidth = 1800;
+let fieldHeight = 950;
 
+async function updateViewport() {
     const width = window.innerWidth;
     const height = window.innerHeight;
 
     svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
 
+    // Sende die Fenstergröße an den Backend
+    try {
+        const response = await fetch("/update_field_size", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                width: width,
+                height: height
+            })
+        });
+        
+        const data = await response.json();
+        fieldWidth = data.field_width;
+        fieldHeight = data.field_height;
+    } catch (error) {
+        console.error("Fehler beim Update der Feldgröße:", error);
+    }
+
     const feld = document.getElementById("spielfeld");
 
+    // Berechne Spielfeldgröße als Vielfaches des Durchmessers
+    const displayFieldWidth = Math.floor((width - SPIELRAND * 2) / DURCHMESSER) * DURCHMESSER;
+    const displayFieldHeight = Math.floor((height - SPIELRAND * 2) / DURCHMESSER) * DURCHMESSER;
+    
+    // Zentriere das Spielfeld mit Spielrand
     feld.setAttribute("x", SPIELRAND);
     feld.setAttribute("y", SPIELRAND);
-    feld.setAttribute("width", width - SPIELRAND * 2);
-    feld.setAttribute("height", height - SPIELRAND * 2);
+    feld.setAttribute("width", displayFieldWidth);
+    feld.setAttribute("height", displayFieldHeight);
 }
 
 window.addEventListener("resize", updateViewport);

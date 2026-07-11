@@ -3,14 +3,21 @@ from kreise import Kreise
 
 class Snace:
 
-    def __init__(self, x_1, y, farbe, farbe_1, durchmesser, anzahl, wartezeit):
+    def __init__(self, x_1, y, farbe, farbe_1, durchmesser, anzahl, wartezeit, spielfeld_width, spielfeld_height, spielrand):
         self.wartezeit = wartezeit
         self.durchmesser = durchmesser
         self.anzahl = anzahl
+        self.spielrand = spielrand
 
-        # Spielfeldgröße
-        self.width = 1500
-        self.height = 900
+        # Spielfeldgröße (ohne Spielrand)
+        self.spielfeld_width = spielfeld_width
+        self.spielfeld_height = spielfeld_height
+        
+        # Absolute Grenzen (mit Spielrand)
+        self.min_x = spielrand + durchmesser / 2
+        self.max_x = spielrand + spielfeld_width - durchmesser / 2
+        self.min_y = spielrand + durchmesser / 2
+        self.max_y = spielrand + spielfeld_height - durchmesser / 2
 
         # Erzeuge die Startliste der Kreise
         self.liste = []
@@ -27,6 +34,9 @@ class Snace:
             self.liste[i].y = self.liste[i - 1].y
 
         # Kopf bewegen
+
+        alte_direction = "right"
+
         if direction == "up":
             self.liste[0].y -= self.durchmesser
 
@@ -39,19 +49,18 @@ class Snace:
         elif direction == "right":
             self.liste[0].x += self.durchmesser
 
+        # Wandkollision mit Wrap-around
         # Linker / rechter Rand
-        if self.liste[0].x - 0.5 * self.durchmesser < self.durchmesser:
-            self.liste[0].x = self.width - 0.5 * self.durchmesser
-
-        elif self.liste[0].x + 0.5 * self.durchmesser > self.width - self.durchmesser:
-            self.liste[0].x = 0.5 * self.durchmesser
+        if self.liste[0].x < self.min_x:
+            self.liste[0].x = self.max_x
+        elif self.liste[0].x > self.max_x:
+            self.liste[0].x = self.min_x
 
         # Oberer / unterer Rand
-        if self.liste[0].y - 0.5 * self.durchmesser < self.durchmesser:
-            self.liste[0].y = self.height - 0.5 * self.durchmesser
-
-        elif self.liste[0].y + 0.5 * self.durchmesser > self.height - self.durchmesser:
-            self.liste[0].y = 0.5 * self.durchmesser
+        if self.liste[0].y < self.min_y:
+            self.liste[0].y = self.max_y
+        elif self.liste[0].y > self.max_y:
+            self.liste[0].y = self.min_y
 
     def get_kreise(self):
         return [

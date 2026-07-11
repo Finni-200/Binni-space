@@ -8,16 +8,25 @@ app = Flask(__name__, template_folder="templates", static_folder="static")
 LINE_COLOR = "#ff0000"
 LINE_WIDTH = 4
 SPIELRAND = 50
+DURCHMESSER = 50
+
+# Globale Variablen für dynamische Größe
+FIELD_WIDTH = 1800
+FIELD_HEIGHT = 950
+START_X = SPIELRAND + (FIELD_WIDTH // 2)
+START_Y = SPIELRAND + (FIELD_HEIGHT // 2)
 
 snake = Snace(
-    x_1=100,
-    y=100,
+    x_1=START_X,
+    y=START_Y,
     farbe="red",
     farbe_1="green",
-    durchmesser=50,
+    durchmesser=DURCHMESSER,
     anzahl=4,
-    wartezeit=1000,
-
+    wartezeit=100,
+    spielfeld_width=FIELD_WIDTH,
+    spielfeld_height=FIELD_HEIGHT,
+    spielrand=SPIELRAND,
 )
 
 current_direction = "right"
@@ -58,6 +67,46 @@ def richtung(richtung):
         current_direction = richtung
 
     return jsonify({"richtung": current_direction})
+
+
+@app.route("/update_field_size", methods=["POST"])
+def update_field_size():
+    global FIELD_WIDTH, FIELD_HEIGHT, START_X, START_Y, snake
+    
+    data = request.json
+    width = data.get("width")
+    height = data.get("height")
+    
+    if width and height:
+        # Berechne neue Spielfeldgröße
+        new_width = ((width - SPIELRAND * 2) // DURCHMESSER) * DURCHMESSER
+        new_height = ((height - SPIELRAND * 2) // DURCHMESSER) * DURCHMESSER
+        
+        # Nur wenn sich die Größe geändert hat, Schlange neu initialisieren
+        if new_width != FIELD_WIDTH or new_height != FIELD_HEIGHT:
+            FIELD_WIDTH = new_width
+            FIELD_HEIGHT = new_height
+            START_X = SPIELRAND + (FIELD_WIDTH // 2)
+            START_Y = SPIELRAND + (FIELD_HEIGHT // 2)
+            
+            # Reinitialize snake with new dimensions
+            snake = Snace(
+                x_1=START_X,
+                y=START_Y,
+                farbe="red",
+                farbe_1="green",
+                durchmesser=DURCHMESSER,
+                anzahl=4,
+                wartezeit=100,
+                spielfeld_width=FIELD_WIDTH,
+                spielfeld_height=FIELD_HEIGHT,
+                spielrand=SPIELRAND,
+            )
+    
+    return jsonify({
+        "field_width": FIELD_WIDTH,
+        "field_height": FIELD_HEIGHT
+    })
 
 
 if __name__ == "__main__":
