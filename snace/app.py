@@ -86,8 +86,8 @@ def update_field_size():
         if new_width != FIELD_WIDTH or new_height != FIELD_HEIGHT:
             FIELD_WIDTH = new_width
             FIELD_HEIGHT = new_height
-            START_X = SPIELRAND + (FIELD_WIDTH // 2)
-            START_Y = SPIELRAND + (FIELD_HEIGHT // 2)
+            START_X = 100 #SPIELRAND + (FIELD_WIDTH // 2)
+            START_Y = 100 #SPIELRAND + (FIELD_HEIGHT // 2)
             
             # Reinitialize snake with new dimensions
             snake = Snace(
@@ -111,3 +111,4 @@ def update_field_size():
 
 if __name__ == "__main__":
     app.run(debug=True, use_reloader=False, port=5001)
+    

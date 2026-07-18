@@ -26,7 +26,22 @@ class Snace:
             color = farbe_1 if i == 0 else farbe
             self.liste.append(Kreise(color, durchmesser, x, y))
 
+        self.current_direction = None
+
     def move(self, direction):
+        if direction in ["up", "down", "left", "right"]:
+            if self.current_direction is None:
+                self.current_direction = direction
+            elif (self.current_direction, direction) not in [
+                ("up", "down"),
+                ("down", "up"),
+                ("left", "right"),
+                ("right", "left"),
+            ]:
+                self.current_direction = direction
+
+        if self.current_direction is None:
+            return
 
         # Körper nachziehen
         for i in range(self.anzahl - 1, 0, -1):
@@ -34,19 +49,13 @@ class Snace:
             self.liste[i].y = self.liste[i - 1].y
 
         # Kopf bewegen
-
-        alte_direction = "right"
-
-        if direction == "up":
+        if self.current_direction == "up":
             self.liste[0].y -= self.durchmesser
-
-        elif direction == "down":
+        elif self.current_direction == "down":
             self.liste[0].y += self.durchmesser
-
-        elif direction == "left":
+        elif self.current_direction == "left":
             self.liste[0].x -= self.durchmesser
-
-        elif direction == "right":
+        elif self.current_direction == "right":
             self.liste[0].x += self.durchmesser
 
         # Wandkollision mit Wrap-around
