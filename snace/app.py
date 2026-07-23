@@ -3,6 +3,7 @@ from snace import Snace
 import threading
 import time
 
+
 app = Flask(__name__, template_folder="templates", static_folder="static")
 
 LINE_COLOR = "#ff0000"
@@ -27,6 +28,8 @@ snake = Snace(
     spielfeld_width=FIELD_WIDTH,
     spielfeld_height=FIELD_HEIGHT,
     spielrand=SPIELRAND,
+    farbe_essen="blue",
+    durchmesser_essen=25,
 )
 
 current_direction = "right"
@@ -52,6 +55,8 @@ def index():
         spielrand=SPIELRAND,
         line_color=LINE_COLOR,
         line_width=LINE_WIDTH,
+        
+
     )
 
 @app.route("/api/snake")
@@ -86,8 +91,8 @@ def update_field_size():
         if new_width != FIELD_WIDTH or new_height != FIELD_HEIGHT:
             FIELD_WIDTH = new_width
             FIELD_HEIGHT = new_height
-            START_X = SPIELRAND + (FIELD_WIDTH // 2)
-            START_Y = SPIELRAND + (FIELD_HEIGHT // 2)
+            START_X = SPIELRAND + (FIELD_WIDTH // 2) - (DURCHMESSER // 2)
+            START_Y = SPIELRAND + (FIELD_HEIGHT // 2) - (DURCHMESSER // 2)
             
             # Reinitialize snake with new dimensions
             snake = Snace(

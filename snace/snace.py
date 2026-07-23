@@ -1,9 +1,11 @@
 from kreise import Kreise
+from essen import Essen
+import random
 
 
 class Snace:
 
-    def __init__(self, x_1, y, farbe, farbe_1, durchmesser, anzahl, wartezeit, spielfeld_width, spielfeld_height, spielrand):
+    def __init__(self, x_1, y, farbe, farbe_1, durchmesser, anzahl, wartezeit, spielfeld_width, spielfeld_height, spielrand, farbe_essen, durchmesser_essen):
         self.wartezeit = wartezeit
         self.durchmesser = durchmesser
         self.anzahl = anzahl
@@ -25,6 +27,26 @@ class Snace:
             x = x_1 - i * durchmesser
             color = farbe_1 if i == 0 else farbe
             self.liste.append(Kreise(color, durchmesser, x, y))
+
+        # Erzeugt das essen 
+        self.essen = Essen(farbe_essen, durchmesser_essen,self.essen.x,self.essen.y)
+
+
+         # zufäluige Position für das essen
+        self.essen.x = random.randint(int(self.min_x-50), int(self.max_x+50))
+        self.essen.y = random.randint(int(self.min_y-50), int(self.max_y+50))
+        
+        def check_essen_collision(self):
+            if self.essen.x == self.liste[0].x and 
+               self.essen.y == self.liste[0].y:
+               return True
+        return False
+    
+        if check_essen_collision(self):
+            self.essen.x = random.randint(int(self.min_x-50), int(self.max_x+50))
+            self.essen.y = random.randint(int(self.min_y-50), int(self.max_y+50))
+            self.liste.append(Kreise(self.liste[-1].farbe, self.durchmesser, self.liste[-1].x, self.liste[-1].y))
+
 
         self.current_direction = None
 
