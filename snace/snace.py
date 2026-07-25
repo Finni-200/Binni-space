@@ -28,27 +28,21 @@ class Snace:
             color = farbe_1 if i == 0 else farbe
             self.liste.append(Kreise(color, durchmesser, x, y))
 
-        # Erzeugt das essen 
-        self.essen = Essen(farbe_essen, durchmesser_essen,self.essen.x,self.essen.y)
-
-
-         # zufäluige Position für das essen
-        self.essen.x = random.randint(int(self.min_x-50), int(self.max_x+50))
-        self.essen.y = random.randint(int(self.min_y-50), int(self.max_y+50))
-        
-        def check_essen_collision(self):
-            if self.essen.x == self.liste[0].x and 
-               self.essen.y == self.liste[0].y:
-               return True
-        return False
-    
-        if check_essen_collision(self):
-            self.essen.x = random.randint(int(self.min_x-50), int(self.max_x+50))
-            self.essen.y = random.randint(int(self.min_y-50), int(self.max_y+50))
-            self.liste.append(Kreise(self.liste[-1].farbe, self.durchmesser, self.liste[-1].x, self.liste[-1].y))
-
+        # Erzeugt das Essen
+        self.essen = Essen(farbe_essen, durchmesser_essen, 0, 0)
+        self._spawn_food()
 
         self.current_direction = None
+
+    def _spawn_food(self):
+        while True:
+            x = random.randint(int(self.min_x), int(self.max_x))
+            y = random.randint(int(self.min_y), int(self.max_y))
+
+            if all(segment.x != x or segment.y != y for segment in self.liste):
+                self.essen.x = x
+                self.essen.y = y
+                break
 
     def move(self, direction):
         if direction in ["up", "down", "left", "right"]:
@@ -64,6 +58,9 @@ class Snace:
 
         if self.current_direction is None:
             return
+
+        tail_x = self.liste[-1].x
+        tail_y = self.liste[-1].y
 
         # Körper nachziehen
         for i in range(self.anzahl - 1, 0, -1):
@@ -92,6 +89,11 @@ class Snace:
             self.liste[0].y = self.max_y
         elif self.liste[0].y > self.max_y:
             self.liste[0].y = self.min_y
+
+        if self.liste[0].x == self.essen.x + self.essen.durchmesser / 2 and self.liste[0].y == self.essen.y + self.essen.durchmesser / 2:
+            self.anzahl += 1
+            self.liste.append(Kreise(self.liste[-2].farbe, self.durchmesser, tail_x, tail_y))
+            self._spawn_food()
 
     def get_kreise(self):
         return [

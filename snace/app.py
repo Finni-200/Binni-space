@@ -1,7 +1,10 @@
 from flask import Flask, render_template, jsonify, request
 from snace import Snace
+from kreise import Kreise
+from essen import Essen
 import threading
 import time
+import random
 
 
 app = Flask(__name__, template_folder="templates", static_folder="static")
@@ -49,19 +52,33 @@ thread.start()
 
 @app.route("/")
 def index():
+    food = {
+        "cx": snake.essen.x,
+        "cy": snake.essen.y,
+        "r": snake.essen.durchmesser / 2,
+        "color": snake.essen.farbe,
+    }
+
     return render_template(
         "index.html",
         circles=snake.get_kreise(),
+        food=food,
         spielrand=SPIELRAND,
         line_color=LINE_COLOR,
         line_width=LINE_WIDTH,
-        
-
     )
 
 @app.route("/api/snake")
 def api_snake():
-    return jsonify(snake.get_kreise())
+    return jsonify({
+        "snake": snake.get_kreise(),
+        "food": {
+            "cx": snake.essen.x,
+            "cy": snake.essen.y,
+            "r": snake.essen.durchmesser / 2,
+            "color": snake.essen.farbe,
+        },
+    })
 
 
 @app.route("/richtung/<richtung>")
@@ -106,6 +123,8 @@ def update_field_size():
                 spielfeld_width=FIELD_WIDTH,
                 spielfeld_height=FIELD_HEIGHT,
                 spielrand=SPIELRAND,
+                farbe_essen="blue",
+                durchmesser_essen=50,
             )
     
     return jsonify({

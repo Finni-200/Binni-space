@@ -79,7 +79,9 @@ setInterval(async () => {
     try{
 
         const response = await fetch("/api/snake");
-        const circles = await response.json();
+        const data = await response.json();
+        const circles = data.snake || [];
+        const food = data.food;
 
         circles.forEach((circle, index) => {
 
@@ -102,6 +104,23 @@ setInterval(async () => {
             elem.setAttribute("fill", circle.color);
 
         });
+
+        let foodElem = document.getElementById("food");
+
+        if(!foodElem){
+            foodElem = document.createElementNS(
+                "http://www.w3.org/2000/svg",
+                "circle"
+            );
+
+            foodElem.setAttribute("id", "food");
+            svg.appendChild(foodElem);
+        }
+
+        foodElem.setAttribute("cx", food.cx);
+        foodElem.setAttribute("cy", food.cy);
+        foodElem.setAttribute("r", food.r);
+        foodElem.setAttribute("fill", food.color);
 
     }
     catch(error){
