@@ -35,9 +35,13 @@ class Snace:
         self.current_direction = None
 
     def _spawn_food(self):
+        # Spawn food on the same movement grid as the snake so the head can reach it exactly.
+        x_steps = int(round((self.max_x - self.min_x) / self.durchmesser))
+        y_steps = int(round((self.max_y - self.min_y) / self.durchmesser))
+
         while True:
-            x = random.randint(int(self.min_x), int(self.max_x))
-            y = random.randint(int(self.min_y), int(self.max_y))
+            x = self.min_x + random.randint(0, x_steps) * self.durchmesser
+            y = self.min_y + random.randint(0, y_steps) * self.durchmesser
 
             if all(segment.x != x or segment.y != y for segment in self.liste):
                 self.essen.x = x
@@ -89,8 +93,9 @@ class Snace:
             self.liste[0].y = self.max_y
         elif self.liste[0].y > self.max_y:
             self.liste[0].y = self.min_y
-
-        if self.liste[0].x == self.essen.x + self.essen.durchmesser / 2 and self.liste[0].y == self.essen.y + self.essen.durchmesser / 2:
+     
+        # Essen berüren 
+        if self.liste[0].x == self.essen.x and self.liste[0].y == self.essen.y:
             self.anzahl += 1
             self.liste.append(Kreise(self.liste[-2].farbe, self.durchmesser, tail_x, tail_y))
             self._spawn_food()
