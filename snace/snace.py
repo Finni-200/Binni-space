@@ -1,5 +1,6 @@
 from kreise import Kreise
 from essen import Essen
+from klein_essen import KleinEssen
 import random
 
 
@@ -28,24 +29,31 @@ class Snace:
             color = farbe_1 if i == 0 else farbe
             self.liste.append(Kreise(color, durchmesser, x, y))
 
-        # Erzeugt das Essen
-        self.essen = Essen(farbe_essen, durchmesser_essen, 0, 0)
-        self._spawn_food()
+        # Erzeugt zwei verschiedene Essen-Objekte mit identischer Optik
+        self.normal_essen = Essen(farbe_essen, durchmesser_essen, 0, 0)
+        self.small_essen = KleinEssen(farbe_essen, durchmesser_essen, 0, 0)
+
+        self.essen = self.normal_essen
+        self._spawn_food(self.normal_essen)
+        self._spawn_food(self.small_essen)
 
         self.current_direction = None
 
-    def _spawn_food(self):
-        # Spawn food on the same movement grid as the snake so the head can reach it exactly.
+    def _spawn_food(self, food, other_food=None):
         x_steps = int(round((self.max_x - self.min_x) / self.durchmesser))
         y_steps = int(round((self.max_y - self.min_y) / self.durchmesser))
+
+        occupied_positions = {(segment.x, segment.y) for segment in self.liste}
+        if other_food is not None:
+            occupied_positions.add((other_food.x, other_food.y))
 
         while True:
             x = self.min_x + random.randint(0, x_steps) * self.durchmesser
             y = self.min_y + random.randint(0, y_steps) * self.durchmesser
 
-            if all(segment.x != x or segment.y != y for segment in self.liste):
-                self.essen.x = x
-                self.essen.y = y
+            if (x, y) not in occupied_positions:
+                food.x = x
+                food.y = y
                 break
 
     def move(self, direction):
@@ -93,12 +101,17 @@ class Snace:
             self.liste[0].y = self.max_y
         elif self.liste[0].y > self.max_y:
             self.liste[0].y = self.min_y
-     
-        # Essen berüren 
-        if self.liste[0].x == self.essen.x and self.liste[0].y == self.essen.y:
+
+        if self.liste[0].x == self.normal_essen.x and self.liste[0].y == self.normal_essen.y:
             self.anzahl += 1
             self.liste.append(Kreise(self.liste[-2].farbe, self.durchmesser, tail_x, tail_y))
-            self._spawn_food()
+            self._spawn_food(self.normal_essen, self.small_essen)
+
+        if self.liste[0].x == self.small_essen.x and self.liste[0].y == self.small_essen.y:
+            if len(self.liste) > 1:
+                self.liste.pop()
+                self.anzahl -= 1
+            self._spawn_food(self.small_essen, self.normal_essen)
 
     def get_kreise(self):
         return [
@@ -109,4 +122,20 @@ class Snace:
                 "color": kreis.farbe
             }
             for kreis in self.liste
+        ]
+
+    def get_food_data(self):
+        return [
+            {
+                "cx": self.normal_essen.x,
+                "cy": self.normal_essen.y,
+                "r": self.normal_essen.durchmesser / 2,
+                "color": self.normal_essen.farbe,
+            },
+            {
+                "cx": self.small_essen.x,
+                "cy": self.small_essen.y,
+                "r": self.small_essen.durchmesser / 2,
+                "color": self.small_essen.farbe,
+            },
         ]

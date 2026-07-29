@@ -57,12 +57,9 @@ svg{
 }
 
 /* Essen */
-#food{
-    fill:url(#foodGradient);
-
+[id^="food-"]{
     stroke:#ffffff;
     stroke-width:2;
-
     filter:
         drop-shadow(0 0 8px red)
         drop-shadow(0 0 18px red);
@@ -96,13 +93,15 @@ svg{
         stroke="none"/>
     {% endfor %}
 
+    {% for food in foods %}
     <circle
-        id="food"
+        id="food-{{ loop.index0 }}"
         cx="{{ food.cx }}"
         cy="{{ food.cy }}"
         r="{{ food.r }}"
         fill="{{ food.color }}"
         stroke="none"/>
+    {% endfor %}
 
 </svg>
 

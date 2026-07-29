@@ -4,7 +4,7 @@ from kreise import Kreise
 from essen import Essen
 import threading
 import time
-import random
+
 
 
 app = Flask(__name__, template_folder="templates", static_folder="static")
@@ -52,17 +52,10 @@ thread.start()
 
 @app.route("/")
 def index():
-    food = {
-        "cx": snake.essen.x,
-        "cy": snake.essen.y,
-        "r": snake.essen.durchmesser / 2,
-        "color": snake.essen.farbe,
-    }
-
     return render_template(
         "index.html",
         circles=snake.get_kreise(),
-        food=food,
+        foods=snake.get_food_data(),
         spielrand=SPIELRAND,
         line_color=LINE_COLOR,
         line_width=LINE_WIDTH,
@@ -72,12 +65,7 @@ def index():
 def api_snake():
     return jsonify({
         "snake": snake.get_kreise(),
-        "food": {
-            "cx": snake.essen.x,
-            "cy": snake.essen.y,
-            "r": snake.essen.durchmesser / 2,
-            "color": snake.essen.farbe,
-        },
+        "foods": snake.get_food_data(),
     })
 
 
