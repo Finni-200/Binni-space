@@ -82,6 +82,26 @@ setInterval(async () => {
         const data = await response.json();
         const circles = data.snake || [];
         const foods = data.foods || [];
+        const smallFoods = data.small_foods || [];
+        smallFoods.forEach((food, index) => {
+            let foodElem = document.getElementById(`small_food-${index}`);
+            if (!foodElem) {
+                foodElem = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                foodElem.setAttribute("id", `small_food-${index}`);
+                svg.appendChild(foodElem);
+            }
+            foodElem.setAttribute("cx", food.cx);
+            foodElem.setAttribute("cy", food.cy);
+            foodElem.setAttribute("r", food.r);
+            foodElem.setAttribute("fill", "url(#small_foodGradient)");
+        });
+        const existingCircles = Array.from(svg.querySelectorAll('[id^="circle-"]'));
+        existingCircles.forEach(elem => {
+            const index = Number(elem.id.replace("circle-", ""));
+            if (index >= circles.length) {
+                elem.remove();
+            }
+        });
 
         circles.forEach((circle, index) => {
 

@@ -56,6 +56,7 @@ def index():
         "index.html",
         circles=snake.get_kreise(),
         foods=snake.get_food_data(),
+        small_foods=snake.get_small_food_data(),
         spielrand=SPIELRAND,
         line_color=LINE_COLOR,
         line_width=LINE_WIDTH,
@@ -66,6 +67,7 @@ def api_snake():
     return jsonify({
         "snake": snake.get_kreise(),
         "foods": snake.get_food_data(),
+        "small_foods": snake.get_small_food_data(),
     })
 
 

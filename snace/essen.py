@@ -6,5 +6,4 @@ class Essen:
         self.x = x_essen
         self.y = y_essen
 
-    def beschreibe(self):
-        return f"Essen: Farbe={self.farbe}, Durchmesser={self.durchmesser}"
+       

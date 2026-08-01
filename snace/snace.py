@@ -31,7 +31,7 @@ class Snace:
 
         # Erzeugt zwei verschiedene Essen-Objekte mit identischer Optik
         self.normal_essen = Essen(farbe_essen, durchmesser_essen, 0, 0)
-        self.small_essen = KleinEssen(farbe_essen, durchmesser_essen, 0, 0)
+        self.small_essen = KleinEssen("green", durchmesser_essen, 0, 0)
 
         self.essen = self.normal_essen
         self._spawn_food(self.normal_essen)
@@ -132,10 +132,14 @@ class Snace:
                 "r": self.normal_essen.durchmesser / 2,
                 "color": self.normal_essen.farbe,
             },
+        ]
+
+    def get_small_food_data(self):
+        return [
             {
                 "cx": self.small_essen.x,
                 "cy": self.small_essen.y,
                 "r": self.small_essen.durchmesser / 2,
                 "color": self.small_essen.farbe,
-            },
+            }
         ]
