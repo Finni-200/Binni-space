@@ -1,7 +1,10 @@
+from dataclasses import dataclass
+
 from essen import Essen
 
 
+@dataclass
 class KleinEssen(Essen):
-    def __init__(self, farbe_essen, durchmesser_essen, x_essen_klein, y_essen_klein):
-        super().__init__(farbe_essen, durchmesser_essen, x_essen_klein, y_essen_klein)
+    """KleinEssen erbt alle Felder und Konstruktoren von Essen."""
+    pass
     

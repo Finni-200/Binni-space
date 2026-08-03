@@ -3,49 +3,76 @@ from essen import Essen
 from klein_essen import KleinEssen
 import random
 
+DIRECTION_VECTORS = {
+    "up": (0, -1),
+    "down": (0, 1),
+    "left": (-1, 0),
+    "right": (1, 0),
+}
+
+OPPOSITE_DIRECTIONS = {
+    "up": "down",
+    "down": "up",
+    "left": "right",
+    "right": "left",
+}
+
 
 class Snace:
 
-    def __init__(self, x_1, y, farbe, farbe_1, durchmesser, anzahl, wartezeit, spielfeld_width, spielfeld_height, spielrand, farbe_essen, durchmesser_essen):
+    def __init__(
+        self,
+        x_1,
+        y,
+        farbe,
+        farbe_1,
+        durchmesser,
+        anzahl,
+        wartezeit,
+        spielfeld_width,
+        spielfeld_height,
+        spielrand,
+        farbe_essen,
+        durchmesser_essen,
+    ):
         self.wartezeit = wartezeit
         self.durchmesser = durchmesser
-        self.anzahl = anzahl
         self.spielrand = spielrand
+        self.length = anzahl
 
-        # Spielfeldgröße (ohne Spielrand)
         self.spielfeld_width = spielfeld_width
         self.spielfeld_height = spielfeld_height
-        
-        # Absolute Grenzen (mit Spielrand)
+
         self.min_x = spielrand + durchmesser / 2
         self.max_x = spielrand + spielfeld_width - durchmesser / 2
         self.min_y = spielrand + durchmesser / 2
-        self.max_y = spielrand + spielfeld_height - durchmesser / 2
+        self.max_y = spielrand + spielfeld_height - durchmesser /2
 
-        # Erzeuge die Startliste der Kreise
-        self.liste = []
-        for i in range(anzahl):
-            x = x_1 - i * durchmesser
-            color = farbe_1 if i == 0 else farbe
-            self.liste.append(Kreise(color, durchmesser, x, y))
+        self.segments = []
+        for index in range(anzahl):
+            x = x_1 - index * durchmesser
+            color = farbe_1 if index == 0 else farbe
+            self.segments.append(Kreise(color, durchmesser, x, y))
 
-        # Erzeugt zwei verschiedene Essen-Objekte mit identischer Optik
+        self.liste = self.segments
+        self.anzahl = anzahl
+
         self.normal_essen = Essen(farbe_essen, durchmesser_essen, 0, 0)
         self.small_essen = KleinEssen("green", durchmesser_essen, 0, 0)
 
         self.essen = self.normal_essen
         self._spawn_food(self.normal_essen)
-        self._spawn_food(self.small_essen)
+        self._spawn_food(self.small_essen, exclude={(self.normal_essen.x, self.normal_essen.y)})
 
         self.current_direction = None
 
-    def _spawn_food(self, food, other_food=None):
-        x_steps = int(round((self.max_x - self.min_x) / self.durchmesser))
-        y_steps = int(round((self.max_y - self.min_y) / self.durchmesser))
+    def _spawn_food(self, food, exclude=None):
+        x_steps = int((self.max_x - self.min_x) / self.durchmesser)
+        y_steps = int((self.max_y - self.min_y) / self.durchmesser)
 
-        occupied_positions = {(segment.x, segment.y) for segment in self.liste}
-        if other_food is not None:
-            occupied_positions.add((other_food.x, other_food.y))
+        occupied_positions = {(segment.x, segment.y) for segment in self.segments}
+        if exclude is not None:
+            occupied_positions |= exclude
 
         while True:
             x = self.min_x + random.randint(0, x_steps) * self.durchmesser
@@ -54,92 +81,71 @@ class Snace:
             if (x, y) not in occupied_positions:
                 food.x = x
                 food.y = y
-                break
+                return
 
     def move(self, direction):
-        if direction in ["up", "down", "left", "right"]:
+        if direction in DIRECTION_VECTORS:
             if self.current_direction is None:
                 self.current_direction = direction
-            elif (self.current_direction, direction) not in [
-                ("up", "down"),
-                ("down", "up"),
-                ("left", "right"),
-                ("right", "left"),
-            ]:
+            elif OPPOSITE_DIRECTIONS[self.current_direction] != direction:
                 self.current_direction = direction
 
         if self.current_direction is None:
             return
 
-        tail_x = self.liste[-1].x
-        tail_y = self.liste[-1].y
+        dx, dy = DIRECTION_VECTORS[self.current_direction]
+        tail_position = (self.segments[-1].x, self.segments[-1].y)
 
-        # Körper nachziehen
-        for i in range(self.anzahl - 1, 0, -1):
-            self.liste[i].x = self.liste[i - 1].x
-            self.liste[i].y = self.liste[i - 1].y
+        for index in range(self.length - 1, 0, -1):
+            self.segments[index].x = self.segments[index - 1].x
+            self.segments[index].y = self.segments[index - 1].y
 
-        # Kopf bewegen
-        if self.current_direction == "up":
-            self.liste[0].y -= self.durchmesser
-        elif self.current_direction == "down":
-            self.liste[0].y += self.durchmesser
-        elif self.current_direction == "left":
-            self.liste[0].x -= self.durchmesser
-        elif self.current_direction == "right":
-            self.liste[0].x += self.durchmesser
+        head = self.segments[0]
+        head.x += dx * self.durchmesser
+        head.y += dy * self.durchmesser
 
-        # Wandkollision mit Wrap-around
-        # Linker / rechter Rand
-        if self.liste[0].x < self.min_x:
-            self.liste[0].x = self.max_x
-        elif self.liste[0].x > self.max_x:
-            self.liste[0].x = self.min_x
+        if head.x < self.min_x:
+            head.x = self.max_x
+        elif head.x > self.max_x:
+            head.x = self.min_x
 
-        # Oberer / unterer Rand
-        if self.liste[0].y < self.min_y:
-            self.liste[0].y = self.max_y
-        elif self.liste[0].y > self.max_y:
-            self.liste[0].y = self.min_y
+        if head.y < self.min_y:
+            head.y = self.max_y
+        elif head.y > self.max_y:
+            head.y = self.min_y
 
-        if self.liste[0].x == self.normal_essen.x and self.liste[0].y == self.normal_essen.y:
-            self.anzahl += 1
-            self.liste.append(Kreise(self.liste[-2].farbe, self.durchmesser, tail_x, tail_y))
-            self._spawn_food(self.normal_essen, self.small_essen)
+        if (head.x, head.y) == (self.normal_essen.x, self.normal_essen.y):
+            old_position = (self.normal_essen.x, self.normal_essen.y)
+            self.segments.append(Kreise(self.segments[-1].farbe, self.durchmesser, *tail_position))
+            self.length = len(self.segments)
+            self._spawn_food(
+                self.normal_essen,
+                exclude={old_position, (self.small_essen.x, self.small_essen.y)},
+            )
 
-        if self.liste[0].x == self.small_essen.x and self.liste[0].y == self.small_essen.y:
-            if len(self.liste) > 1:
-                self.liste.pop()
-                self.anzahl -= 1
-            self._spawn_food(self.small_essen, self.normal_essen)
+        elif (head.x, head.y) == (self.small_essen.x, self.small_essen.y):
+            old_position = (self.small_essen.x, self.small_essen.y)
+            if self.length > 1:
+                self.segments.pop()
+                self.length = len(self.segments)
+            self._spawn_food(
+                self.small_essen,
+                exclude={old_position, (self.normal_essen.x, self.normal_essen.y)},
+            )
+
+    def _shape_to_svg(self, shape):
+        return {
+            "cx": shape.x,
+            "cy": shape.y,
+            "r": shape.durchmesser / 2,
+            "color": shape.farbe,
+        }
 
     def get_kreise(self):
-        return [
-            {
-                "cx": kreis.x,
-                "cy": kreis.y,
-                "r": kreis.durchmesser / 2,
-                "color": kreis.farbe
-            }
-            for kreis in self.liste
-        ]
+        return [self._shape_to_svg(segment) for segment in self.segments]
 
     def get_food_data(self):
-        return [
-            {
-                "cx": self.normal_essen.x,
-                "cy": self.normal_essen.y,
-                "r": self.normal_essen.durchmesser / 2,
-                "color": self.normal_essen.farbe,
-            },
-        ]
+        return [self._shape_to_svg(self.normal_essen)]
 
     def get_small_food_data(self):
-        return [
-            {
-                "cx": self.small_essen.x,
-                "cy": self.small_essen.y,
-                "r": self.small_essen.durchmesser / 2,
-                "color": self.small_essen.farbe,
-            }
-        ]
+        return [self._shape_to_svg(self.small_essen)]
