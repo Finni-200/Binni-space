@@ -1,6 +1,7 @@
 from kreise import Kreise
 from essen import Essen
 from klein_essen import KleinEssen
+from levels import get_level, get_next_level
 import random
 
 DIRECTION_VECTORS = {
@@ -65,6 +66,9 @@ class Snace:
         self._spawn_food(self.small_essen, exclude={(self.normal_essen.x, self.normal_essen.y)})
 
         self.current_direction = None
+        self.current_level = get_level(1)
+        self.food_eaten_in_level = 0
+        self.required_food_for_level = 2
 
     def _spawn_food(self, food, exclude=None):
         x_steps = int((self.max_x - self.min_x) / self.durchmesser)
@@ -91,7 +95,7 @@ class Snace:
                 self.current_direction = direction
 
         if self.current_direction is None:
-            return
+            return {"ate_normal_food": False, "level_up": False}
 
         dx, dy = DIRECTION_VECTORS[self.current_direction]
         tail_position = (self.segments[-1].x, self.segments[-1].y)
@@ -114,10 +118,15 @@ class Snace:
         elif head.y > self.max_y:
             head.y = self.min_y
 
+        ate_normal_food = False
+        level_up = False
+
         if (head.x, head.y) == (self.normal_essen.x, self.normal_essen.y):
             old_position = (self.normal_essen.x, self.normal_essen.y)
             self.segments.append(Kreise(self.segments[-1].farbe, self.durchmesser, *tail_position))
             self.length = len(self.segments)
+            self.food_eaten_in_level += 1
+            ate_normal_food = True
             self._spawn_food(
                 self.normal_essen,
                 exclude={old_position, (self.small_essen.x, self.small_essen.y)},
@@ -132,6 +141,16 @@ class Snace:
                 self.small_essen,
                 exclude={old_position, (self.normal_essen.x, self.normal_essen.y)},
             )
+
+        if ate_normal_food and self.food_eaten_in_level >= self.required_food_for_level:
+            next_level = get_next_level(self.current_level.number)
+            if next_level is not None:
+                self.current_level = next_level
+                self.wartezeit = next_level.speed
+                self.food_eaten_in_level = 0
+                level_up = True
+
+        return {"ate_normal_food": ate_normal_food, "level_up": level_up}
 
     def _shape_to_svg(self, shape):
         return {
