@@ -5,7 +5,7 @@ from dataclasses import dataclass
 class Essen:
     farbe: str
     durchmesser: int
-    x: int
-    y: int
+    x: float
+    y: float
 
        

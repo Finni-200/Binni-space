@@ -5,5 +5,5 @@ from dataclasses import dataclass
 class Kreise:
     farbe: str
     durchmesser: int
-    x: int
-    y: int
+    x: float
+    y: float
