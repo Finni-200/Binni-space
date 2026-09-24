@@ -3,17 +3,19 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "snace"))
 
-from levels import LEVELS, get_level, get_next_level
+from levels import LEVELS, WINNER, get_level, get_level_for_length, get_next_level
 from snace import Snace
 
 
 def test_levels_are_available_and_ordered():
-    assert len(LEVELS) >= 6
+    assert len(LEVELS) == 10
     assert LEVELS[0].number == 1
     assert LEVELS[0].name == "Level 1"
     assert LEVELS[1].number == 2
     assert LEVELS[2].number == 3
     assert LEVELS[5].number == 6
+    assert LEVELS[-1].number == WINNER
+    assert all(level.description for level in LEVELS)
 
 
 def test_get_level_and_next_level_helpers_work():
@@ -22,7 +24,16 @@ def test_get_level_and_next_level_helpers_work():
     assert level_2.name == "Level 2"
     assert get_next_level(2).number == 3
     assert get_next_level(5).number == 6
-    assert get_next_level(6) is None
+    assert get_next_level(6).number == 7
+    assert get_next_level(9).number == WINNER
+    assert get_next_level(WINNER) is None
+
+
+def test_get_level_for_length_uses_the_level_thresholds():
+    assert get_level_for_length(4).number == 1
+    assert get_level_for_length(5).number == 2
+    assert get_level_for_length(19).number == 9
+    assert get_level_for_length(20).number == WINNER
 
 
 def test_snake_advances_to_next_level_after_required_food():

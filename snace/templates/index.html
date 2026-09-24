@@ -87,6 +87,15 @@ svg{
     width="100%"
     height="100%">
 
+    <text
+        id="level-text"
+        x="{{ spielrand + 20 }}"
+        y="{{ spielrand - 10 }}"
+        fill="#ffffff"
+        font-size="28"
+        font-weight="700"
+        font-family="Arial, Helvetica, sans-serif">Level {{ current_level }}</text>
+
     <rect
         id="spielfeld"
         x="{{ spielrand }}"

@@ -1,5 +1,6 @@
 from flask import Flask, render_template, jsonify, request
 from snace import Snace
+from levels import get_level_for_length
 import threading
 import time
 
@@ -57,6 +58,7 @@ def index():
         spielrand=SPIELRAND,
         line_color=LINE_COLOR,
         line_width=LINE_WIDTH,
+        current_level=get_level_for_length(snake.length).number,
     )
 
 
@@ -66,6 +68,7 @@ def api_snake():
         snake=snake.get_kreise(),
         foods=snake.get_food_data(),
         small_foods=snake.get_small_food_data(),
+        current_level=get_level_for_length(snake.length).number,
     )
 
 

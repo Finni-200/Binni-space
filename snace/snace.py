@@ -1,7 +1,7 @@
 from kreise import Kreise
 from essen import Essen
 from klein_essen import KleinEssen
-from levels import get_level, get_next_level
+from levels import get_level, get_level_for_length, get_next_level
 import random
 
 DIRECTION_VECTORS = {
@@ -44,10 +44,13 @@ class Snace:
         self.spielfeld_width = spielfeld_width
         self.spielfeld_height = spielfeld_height
 
-        self.min_x = spielrand + durchmesser / 2
-        self.max_x = spielrand + spielfeld_width - durchmesser / 2
-        self.min_y = spielrand + durchmesser / 2
-        self.max_y = spielrand + spielfeld_height - durchmesser /2
+        radius = durchmesser / 2
+
+        self.min_x = spielrand + radius
+        self.max_x = spielrand + spielfeld_width - radius
+        
+        self.min_y = spielrand + radius
+        self.max_y = spielrand + spielfeld_height - radius
 
         self.segments = []
         for index in range(anzahl):
@@ -63,7 +66,8 @@ class Snace:
 
         self.essen = self.normal_essen
         self._spawn_food(self.normal_essen)
-        self._spawn_food(self.small_essen, exclude={(self.normal_essen.x, self.normal_essen.y)})
+        if get_level_for_length(self.length).number >= 2:
+            self._spawn_food(self.small_essen, exclude={(self.normal_essen.x, self.normal_essen.y)})
 
         self.current_direction = None
         self.current_level = get_level(1)
@@ -97,6 +101,9 @@ class Snace:
         if self.current_direction is None:
             return {"ate_normal_food": False, "level_up": False}
 
+        if get_level_for_length(self.length).number >= 2 and self.small_essen.x == 0 and self.small_essen.y == 0:
+            self._spawn_food(self.small_essen, exclude={(self.normal_essen.x, self.normal_essen.y)})
+
         dx, dy = DIRECTION_VECTORS[self.current_direction]
         tail_position = (self.segments[-1].x, self.segments[-1].y)
 
@@ -112,7 +119,7 @@ class Snace:
             head.x = self.max_x
         elif head.x > self.max_x:
             head.x = self.min_x
-
+        
         if head.y < self.min_y:
             head.y = self.max_y
         elif head.y > self.max_y:
@@ -132,7 +139,7 @@ class Snace:
                 exclude={old_position, (self.small_essen.x, self.small_essen.y)},
             )
 
-        elif (head.x, head.y) == (self.small_essen.x, self.small_essen.y):
+        elif get_level_for_length(self.length).number >= 2 and (head.x, head.y) == (self.small_essen.x, self.small_essen.y):
             old_position = (self.small_essen.x, self.small_essen.y)
             if self.length > 1:
                 self.segments.pop()
@@ -167,4 +174,6 @@ class Snace:
         return [self._shape_to_svg(self.normal_essen)]
 
     def get_small_food_data(self):
+        if get_level_for_length(self.length).number < 2:
+            return []
         return [self._shape_to_svg(self.small_essen)]
