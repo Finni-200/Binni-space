@@ -76,6 +76,13 @@ svg{
         drop-shadow(0 0 18px rgb(255, 0, 0));
 }
 
+#angry-bird-0{
+    fill:#2da44e;
+    stroke:#1a7f37;
+    stroke-width:2;
+    filter:drop-shadow(0 0 6px rgba(45,164,78,0.65));
+}
+
 </style>
 </head>
 
@@ -132,6 +139,15 @@ svg{
         r="{{ small_food.r }}"
         fill="url(#small_foodGradient)"
         stroke="none"/>
+    {% endfor %}
+
+    {% for angry_bird in angry_birds %}
+    <path
+        id="angry-bird-{{ loop.index0 }}"
+        data-cx="{{ angry_bird.cx }}"
+        data-cy="{{ angry_bird.cy }}"
+        data-r="{{ angry_bird.r }}"
+        fill="{{ angry_bird.color }}" />
     {% endfor %}
 
 </svg>

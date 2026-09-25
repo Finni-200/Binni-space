@@ -6,25 +6,28 @@ class Level:
     number: int
     name: str
     speed: int
-    food_count: int = 1
-    description: str = ""
-    minimum_length: int = 1
+    normal_f_c: int
+    small_f_c: int 
+    Angry_Bird_c: int 
+    W: int 
+    description: str 
+    minimum_length: int 
 
 
 WINNER = 10
 
 
 LEVELS = [
-    Level(number=1, name="Level 1", speed=100, food_count=1, description="Einfacher Start", minimum_length=1),
-    Level(number=2, name="Level 2", speed=100, food_count=2, description="Etwas schneller", minimum_length=5),
-    Level(number=3, name="Level 3", speed=100, food_count=2, description="Mehr Essen", minimum_length=7),
-    Level(number=4, name="Level 4", speed=100, food_count=2, description="Schnelleres Spiel", minimum_length=9),
-    Level(number=5, name="Level 5", speed=100, food_count=2, description="Schwieriger", minimum_length=11),
-    Level(number=6, name="Level 6", speed=100, food_count=2, description="Jetzt wird es ernst", minimum_length=13),
-    Level(number=7, name="Level 7", speed=100, food_count=2, description="Die Schlange wird lang", minimum_length=15),
-    Level(number=8, name="Level 8", speed=100, food_count=2, description="Nur noch wenige Schritte", minimum_length=17),
-    Level(number=9, name="Level 9", speed=100, food_count=2, description="Fast geschafft", minimum_length=19),
-    Level(number=WINNER, name="Gewonnen", speed=100, food_count=0, description="Du hast alle Level geschafft", minimum_length=20),
+    Level(number=1, name="Level 1", speed=100, normal_f_c=1, small_f_c=0, Angry_Bird_c=0, W=0, description="Einfacher Start", minimum_length=1),
+    Level(number=2, name="Level 2", speed=100, normal_f_c=1, small_f_c=1, Angry_Bird_c=0, W=0, description="Zwei Essen", minimum_length=5),
+    Level(number=3, name="Level 3", speed=100, normal_f_c=1, small_f_c=1, Angry_Bird_c=0, W=0, description="Mehr Essen in 10 sek", minimum_length=7),
+    Level(number=4, name="Level 4", speed=100, normal_f_c=1, small_f_c=1, Angry_Bird_c=1, W=0, description="Mit Angry Birds", minimum_length=9),
+    Level(number=5, name="Level 5", speed=100, normal_f_c=1, small_f_c=1, Angry_Bird_c=1, W=0, description="Angry Birds in 10 sek", minimum_length=11),
+    Level(number=6, name="Level 6", speed=300, normal_f_c=1, small_f_c=1, Angry_Bird_c=1, W=0, description="Jetzt wird es schnell", minimum_length=13),
+    Level(number=7, name="Level 7", speed=100, normal_f_c=1, small_f_c=1, Angry_Bird_c=1, W=1, description="Jezt kommen die Wände", minimum_length=15),
+    Level(number=8, name="Level 8", speed=100, normal_f_c=1, small_f_c=1, Angry_Bird_c=1, W=1, description="Wände und small Essen", minimum_length=17),
+    Level(number=9, name="Level 9", speed=100, normal_f_c=1, small_f_c=1, Angry_Bird_c=1, W=1, description="Wände und Angry Birds", minimum_length=19),
+    Level(number=WINNER, name="Gewonnen", speed=100, normal_f_c=0, small_f_c=0, Angry_Bird_c=0, W=0, description="Du hast alle Level geschafft", minimum_length=20),
 ]
 
 

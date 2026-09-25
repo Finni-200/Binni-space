@@ -1,3 +1,4 @@
+import math
 from dataclasses import dataclass
 
 
@@ -13,11 +14,13 @@ class GrundKreis:
     def berechne_spielfeldgroesse(fenster_breite: int, fenster_hoehe: int, spielrand: int, durchmesser: int) -> tuple[int, int]:
         """Berechnet die sichtbare Spielfeldgröße aus der Fenstergröße.
 
-        Das Ergebnis wird auf das nächstkleinere Vielfache des Durchmessers gerundet
-        und berücksichtigt den Spielrand auf allen Seiten.
+        Die Breite wird auf die nächste komplette Zelle gerundet, damit das
+        Spielfeld die sichtbare Breite nicht unnötig schmaler macht. Die Höhe
+        wird auf die vorherige komplette Zelle gerundet, damit die Spielgrenzen
+        im sichtbaren Fenster korrekt bleiben.
         """
-        feld_breite = ((fenster_breite - spielrand * 2) // durchmesser) * durchmesser
-        feld_hoehe = ((fenster_hoehe - spielrand * 2) // durchmesser) * durchmesser
+        feld_breite = math.ceil((fenster_breite - spielrand * 2) / durchmesser) * durchmesser
+        feld_hoehe = math.floor((fenster_hoehe - spielrand * 2) / durchmesser) * durchmesser
         return feld_breite, feld_hoehe
 
     @staticmethod

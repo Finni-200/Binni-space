@@ -3,6 +3,8 @@ const svg = document.getElementById("field");
 const SPIELRAND = 50;
 const DURCHMESSER = 50;
 
+let mouthPhase = 0;
+
 let fieldWidth = 1800;
 let fieldHeight = 950;
 
@@ -82,6 +84,7 @@ async function updateSnake() {
         const circles = data.snake || [];
         const foods = data.foods || [];
         const smallFoods = data.small_foods || [];
+        const angryBirds = data.angry_birds || [];
         const currentLevel = data.current_level ?? 1;
 
         const levelText = document.getElementById("level-text");
@@ -231,6 +234,40 @@ async function updateSnake() {
             }
         });
 
+        const existingAngryBirds = Array.from(
+            svg.querySelectorAll('[id^="angry-bird-"]')
+        );
+
+        angryBirds.forEach((bird, index) => {
+            let birdElem = document.getElementById(`angry-bird-${index}`);
+            if (!birdElem) {
+                birdElem = document.createElementNS(
+                    "http://www.w3.org/2000/svg",
+                    "path"
+                );
+                birdElem.setAttribute("id", `angry-bird-${index}`);
+                svg.appendChild(birdElem);
+            }
+
+            birdElem.dataset.cx = bird.cx;
+            birdElem.dataset.cy = bird.cy;
+            birdElem.dataset.r = bird.r;
+            birdElem.setAttribute("fill", bird.color);
+            birdElem.setAttribute(
+                "d",
+                createMouthPath(bird.cx, bird.cy, bird.r, mouthPhase)
+            );
+        });
+
+        existingAngryBirds.forEach(birdElem => {
+            const index = Number(
+                birdElem.id.replace("angry-bird-", "")
+            );
+            if (index >= angryBirds.length) {
+                birdElem.remove();
+            }
+        });
+
 
     } catch (error) {
 
@@ -241,6 +278,37 @@ async function updateSnake() {
 
     }
 }
+
+function createMouthPath(cx, cy, radius, phase) {
+    const mouthAngle = 22 + (Math.sin(phase) + 1) * 24;
+    const halfAngle = mouthAngle * Math.PI / 360;
+    const upperX = cx + radius * Math.cos(halfAngle);
+    const upperY = cy - radius * Math.sin(halfAngle);
+    const lowerX = cx + radius * Math.cos(halfAngle);
+    const lowerY = cy + radius * Math.sin(halfAngle);
+
+    return `M ${cx} ${cy} L ${upperX} ${upperY} A ${radius} ${radius} 0 1 1 ${lowerX} ${lowerY} Z`;
+}
+
+function animateMouth(timestamp) {
+    mouthPhase = timestamp / 260;
+    document.querySelectorAll('[id^="angry-bird-"]').forEach(bird => {
+        bird.setAttribute(
+            "d",
+            createMouthPath(
+                Number(bird.dataset.cx),
+                Number(bird.dataset.cy),
+                Number(bird.dataset.r),
+                mouthPhase
+            )
+        );
+    });
+    requestAnimationFrame(animateMouth);
+}
+
+window.addEventListener("load", () => {
+    requestAnimationFrame(animateMouth);
+});
 
 
 // =====================================================

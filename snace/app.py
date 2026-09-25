@@ -1,6 +1,7 @@
 from flask import Flask, render_template, jsonify, request
 from snace import Snace
 from levels import get_level_for_length
+import math
 import threading
 import time
 
@@ -55,6 +56,7 @@ def index():
         circles=snake.get_kreise(),
         foods=snake.get_food_data(),
         small_foods=snake.get_small_food_data(),
+        angry_birds=snake.get_angry_bird_data(),
         spielrand=SPIELRAND,
         line_color=LINE_COLOR,
         line_width=LINE_WIDTH,
@@ -68,6 +70,7 @@ def api_snake():
         snake=snake.get_kreise(),
         foods=snake.get_food_data(),
         small_foods=snake.get_small_food_data(),
+        angry_birds=snake.get_angry_bird_data(),
         current_level=get_level_for_length(snake.length).number,
     )
 
@@ -91,8 +94,8 @@ def update_field_size():
     height = data.get("height")
 
     if isinstance(width, int) and isinstance(height, int):
-        new_width = ((width - SPIELRAND * 2) // KREIS_DURCHMESSER) * KREIS_DURCHMESSER
-        new_height = ((height - SPIELRAND * 2) // KREIS_DURCHMESSER) * KREIS_DURCHMESSER
+        new_width = math.ceil((width - SPIELRAND * 2) / KREIS_DURCHMESSER) * KREIS_DURCHMESSER
+        new_height = math.floor((height - SPIELRAND * 2) / KREIS_DURCHMESSER) * KREIS_DURCHMESSER
 
         if new_width != FIELD_WIDTH or new_height != FIELD_HEIGHT:
             FIELD_WIDTH = new_width

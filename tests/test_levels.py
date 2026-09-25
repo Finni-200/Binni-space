@@ -36,6 +36,55 @@ def test_get_level_for_length_uses_the_level_thresholds():
     assert get_level_for_length(20).number == WINNER
 
 
+def test_green_mouth_obstacle_starts_at_angry_bird_level():
+    snake = Snace(
+        x_1=200,
+        y=200,
+        farbe="red",
+        farbe_1="green",
+        durchmesser=20,
+        anzahl=9,
+        wartezeit=100,
+        spielfeld_width=400,
+        spielfeld_height=400,
+        spielrand=0,
+        farbe_essen="blue",
+        durchmesser_essen=10,
+    )
+
+    angry_birds = snake.get_angry_bird_data()
+
+    assert len(angry_birds) == 1
+    assert angry_birds[0]["color"] == "#2da44e"
+    assert angry_birds[0]["r"] == 10
+
+
+def test_green_mouth_obstacle_follows_snake_one_step_at_a_time():
+    snake = Snace(
+        x_1=200,
+        y=200,
+        farbe="red",
+        farbe_1="green",
+        durchmesser=20,
+        anzahl=9,
+        wartezeit=100,
+        spielfeld_width=400,
+        spielfeld_height=400,
+        spielrand=0,
+        farbe_essen="blue",
+        durchmesser_essen=10,
+    )
+    snake.normal_essen.x = 20
+    snake.normal_essen.y = 20
+    snake.current_direction = "right"
+    snake.angry_bird = {"cx": 20, "cy": 200, "r": 10, "color": "#2da44e"}
+
+    snake.move("right")
+
+    assert snake.angry_bird["cx"] == 40
+    assert snake.angry_bird["cy"] == 200
+
+
 def test_snake_advances_to_next_level_after_required_food():
     snake = Snace(
         x_1=100,
