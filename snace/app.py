@@ -1,6 +1,7 @@
 from flask import Flask, render_template, jsonify, request
 from snace import Snace
 from levels import get_level_for_length
+from score_database import ScoreDatabase
 import math
 import threading
 import time
@@ -38,6 +39,7 @@ def create_snake(width, height):
 
 
 snake = create_snake(FIELD_WIDTH, FIELD_HEIGHT)
+score_database = ScoreDatabase()
 current_direction = "right"
 
 
@@ -61,6 +63,8 @@ def index():
         line_color=LINE_COLOR,
         line_width=LINE_WIDTH,
         current_level=get_level_for_length(snake.length).number,
+        last_result=score_database.get_last_result(),
+        current_score=snake.score,
     )
 
 
@@ -72,6 +76,7 @@ def api_snake():
         small_foods=snake.get_small_food_data(),
         angry_birds=snake.get_angry_bird_data(),
         current_level=get_level_for_length(snake.length).number,
+        score=snake.score,
     )
 
 
@@ -83,6 +88,11 @@ def richtung(richtung):
         current_direction = richtung
 
     return jsonify({"richtung": current_direction})
+
+
+@app.route("/api/finish-game", methods=["POST"])
+def finish_game():
+    return jsonify(score_database.save_score(snake.score))
 
 
 @app.route("/update_field_size", methods=["POST"])
@@ -98,9 +108,11 @@ def update_field_size():
         new_height = math.floor((height - SPIELRAND * 2) / KREIS_DURCHMESSER) * KREIS_DURCHMESSER
 
         if new_width != FIELD_WIDTH or new_height != FIELD_HEIGHT:
+            previous_score = snake.score
             FIELD_WIDTH = new_width
             FIELD_HEIGHT = new_height
             snake = create_snake(FIELD_WIDTH, FIELD_HEIGHT)
+            snake.score = previous_score
 
     return jsonify(field_width=FIELD_WIDTH, field_height=FIELD_HEIGHT)
 

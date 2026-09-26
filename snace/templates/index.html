@@ -103,6 +103,23 @@ svg{
         font-weight="700"
         font-family="Arial, Helvetica, sans-serif">Level {{ current_level }}</text>
 
+    <text
+        id="score-text"
+        x="{{ spielrand + 220 }}"
+        y="{{ spielrand - 10 }}"
+        fill="#ffffff"
+        font-size="24"
+        font-weight="700"
+        font-family="Arial, Helvetica, sans-serif">Punkte: {{ current_score }}</text>
+
+    <text
+        id="last-result-text"
+        x="{{ spielrand + 20 }}"
+        y="{{ spielrand + 35 }}"
+        fill="#ffffff"
+        font-size="18"
+        font-family="Arial, Helvetica, sans-serif">{% if last_result %}Letztes Spiel: {{ last_result.score }} Punkte{% if last_result.previous_score is not none %}, {{ last_result.comparison }} als zuvor ({{ last_result.previous_score }}){% else %}, {{ last_result.comparison }}{% endif %}{% else %}Noch kein gespeicherter Score{% endif %}</text>
+
     <rect
         id="spielfeld"
         x="{{ spielrand }}"

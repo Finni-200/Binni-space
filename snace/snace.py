@@ -40,6 +40,7 @@ class Snace:
         self.durchmesser = durchmesser
         self.spielrand = spielrand
         self.length = anzahl
+        self.score = 0
 
         self.spielfeld_width = spielfeld_width
         self.spielfeld_height = spielfeld_height
@@ -174,6 +175,7 @@ class Snace:
             self.segments.append(Kreise(self.segments[-1].farbe, self.durchmesser, *tail_position))
             self.length = len(self.segments)
             self.food_eaten_in_level += 1
+            self.score += 1
             ate_normal_food = True
             self._spawn_food(
                 self.normal_essen,

@@ -86,10 +86,16 @@ async function updateSnake() {
         const smallFoods = data.small_foods || [];
         const angryBirds = data.angry_birds || [];
         const currentLevel = data.current_level ?? 1;
+        const score = data.score ?? 0;
 
         const levelText = document.getElementById("level-text");
         if (levelText) {
             levelText.textContent = `Level ${currentLevel}`;
+        }
+
+        const scoreText = document.getElementById("score-text");
+        if (scoreText) {
+            scoreText.textContent = `Punkte: ${score}`;
         }
 
         // ---------------------------------------------
@@ -308,6 +314,20 @@ function animateMouth(timestamp) {
 
 window.addEventListener("load", () => {
     requestAnimationFrame(animateMouth);
+});
+
+let scoreSubmitted = false;
+window.addEventListener("pagehide", () => {
+    if (scoreSubmitted) {
+        return;
+    }
+    scoreSubmitted = true;
+    fetch("/api/finish-game", {
+        method: "POST",
+        keepalive: true
+    }).catch(error => {
+        console.error("Score konnte nicht gespeichert werden:", error);
+    });
 });
 
 

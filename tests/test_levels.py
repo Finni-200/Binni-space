@@ -117,3 +117,4 @@ def test_snake_advances_to_next_level_after_required_food():
     assert second_result["level_up"] is True
     assert snake.current_level.number == 2
     assert snake.wartezeit == get_level(2).speed
+    assert snake.score == 2
