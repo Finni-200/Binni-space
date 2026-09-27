@@ -7,6 +7,47 @@ let mouthPhase = 0;
 
 let fieldWidth = 1800;
 let fieldHeight = 950;
+let gameStarted = false;
+const introScreen = document.getElementById("intro-screen");
+const introScore = document.getElementById("intro-score");
+const introComparison = document.getElementById("intro-comparison");
+const startButton = document.getElementById("start-button");
+const closeButton = document.getElementById("close-button");
+const quitButton = document.getElementById("quit-button");
+
+startButton.addEventListener("click", async () => {
+    try {
+        const response = await fetch("/api/start-game", { method: "POST" });
+        if (!response.ok) {
+            throw new Error("Der Spielstart wurde abgelehnt.");
+        }
+        gameStarted = true;
+        scoreSubmitted = false;
+        introScreen.hidden = true;
+        closeButton.hidden = true;
+        quitButton.hidden = false;
+    } catch (error) {
+        console.error("Spiel konnte nicht gestartet werden:", error);
+    }
+});
+
+closeButton.addEventListener("click", () => {
+    window.close();
+    if (!window.closed) {
+        window.location.replace("https://github.com/Finni-200/Binni-space");
+    }
+});
+
+quitButton.addEventListener("click", async () => {
+    quitButton.disabled = true;
+    try {
+        const response = await fetch("/api/finish-game", { method: "POST" });
+        showGameOver(await response.json());
+    } catch (error) {
+        console.error("Spiel konnte nicht beendet werden:", error);
+        quitButton.disabled = false;
+    }
+});
 
 
 // =====================================================
@@ -274,6 +315,9 @@ async function updateSnake() {
             }
         });
 
+        if (data.game_over && data.game_result && gameStarted && !scoreSubmitted) {
+            showGameOver(data.game_result);
+        }
 
     } catch (error) {
 
@@ -283,6 +327,30 @@ async function updateSnake() {
         );
 
     }
+}
+
+function showGameOver(result) {
+    if (!result || result.saved === false) {
+        return;
+    }
+
+    gameStarted = false;
+    scoreSubmitted = true;
+    quitButton.hidden = true;
+    quitButton.disabled = false;
+    introScore.textContent = `Dein Score ist ${result.score}`;
+
+    const comparisonText = {
+        besser: `Du warst besser als beim letzten Spiel (${result.previous_score} Punkte).`,
+        schlechter: `Du warst schlechter als beim letzten Spiel (${result.previous_score} Punkte).`,
+        gleich: `Du warst genauso gut wie beim letzten Spiel (${result.previous_score} Punkte).`,
+        "erstes Spiel": "Das war dein erstes Spiel."
+    };
+    introComparison.textContent = comparisonText[result.comparison] || "";
+    introComparison.hidden = !introComparison.textContent;
+    startButton.textContent = "Nochmal spielen";
+    closeButton.hidden = false;
+    introScreen.hidden = false;
 }
 
 function createMouthPath(cx, cy, radius, phase) {
@@ -318,7 +386,7 @@ window.addEventListener("load", () => {
 
 let scoreSubmitted = false;
 window.addEventListener("pagehide", () => {
-    if (scoreSubmitted) {
+    if (!gameStarted || scoreSubmitted) {
         return;
     }
     scoreSubmitted = true;
@@ -338,6 +406,10 @@ window.addEventListener("pagehide", () => {
 document.addEventListener(
     "keydown",
     async function(event) {
+
+        if (!gameStarted) {
+            return;
+        }
 
         let richtung = null;
 

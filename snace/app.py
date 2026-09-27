@@ -41,18 +41,25 @@ def create_snake(width, height):
 snake = create_snake(FIELD_WIDTH, FIELD_HEIGHT)
 score_database = ScoreDatabase()
 current_direction = "right"
+game_started = threading.Event()
+game_lock = threading.Lock()
+game_result = None
 
 
 def move_snake_loop():
     global current_direction
 
     while True:
+        game_started.wait()
         snake.move(current_direction)
+        if snake.length <= 1:
+            finish_current_game()
         time.sleep(snake.wartezeit / 1000)
 
 
 @app.route("/")
 def index():
+    game_started.clear()
     return render_template(
         "index.html",
         circles=snake.get_kreise(),
@@ -77,6 +84,8 @@ def api_snake():
         angry_birds=snake.get_angry_bird_data(),
         current_level=get_level_for_length(snake.length).number,
         score=snake.score,
+        game_over=game_result is not None,
+        game_result=game_result,
     )
 
 
@@ -92,7 +101,33 @@ def richtung(richtung):
 
 @app.route("/api/finish-game", methods=["POST"])
 def finish_game():
-    return jsonify(score_database.save_score(snake.score))
+    return jsonify(finish_current_game())
+
+
+def finish_current_game():
+    global game_result
+
+    with game_lock:
+        if game_result is not None:
+            return game_result
+        if not game_started.is_set():
+            return {"saved": False}
+
+        game_started.clear()
+        game_result = score_database.save_score(snake.score)
+        return game_result
+
+
+@app.route("/api/start-game", methods=["POST"])
+def start_game():
+    global snake, current_direction, game_result
+
+    with game_lock:
+        snake = create_snake(FIELD_WIDTH, FIELD_HEIGHT)
+        current_direction = "right"
+        game_result = None
+        game_started.set()
+    return jsonify({"started": True})
 
 
 @app.route("/update_field_size", methods=["POST"])
