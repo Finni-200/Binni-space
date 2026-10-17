@@ -7,6 +7,7 @@
     <title>Snace</title>
 
     <style>
+/* Grundlayout: volle Bildschirmgröße und dunkler Hintergrund */
 html, body{
     width:100%;
     height:100%;
@@ -16,6 +17,7 @@ html, body{
     font-family:Arial,Helvetica,sans-serif;
 }
 
+/* Intro-Bildschirm: Startoverlay vor dem eigentlichen Spiel */
 #intro-screen{
     position:fixed;
     inset:0;
@@ -78,6 +80,7 @@ html, body{
     box-shadow:0 0 10px #00e5ff,0 0 26px #00b7ff,inset 0 0 12px #00b7ff;
 }
 
+/* Aktionen im Intro-Bereich: Start und Schließen */
 #intro-actions{
     position:absolute;
     right:clamp(20px,5vw,64px);
@@ -144,7 +147,7 @@ svg{
     display:block;
 }
 
-/* Spielfeld */
+/* Grafik-Styles für das Spiel: Spielfeld, Schlange und Essen */
 #spielfeld{
     fill:#081018;
     stroke:#ff006e;
@@ -210,6 +213,7 @@ svg{
 
 <body>
 
+<!-- Intro-Bildschirm, der vor dem Spiel angezeigt wird -->
 <section id="intro-screen" aria-labelledby="intro-title">
     <span class="intro-orb one" aria-hidden="true"></span>
     <span class="intro-orb two" aria-hidden="true"></span>
@@ -220,18 +224,23 @@ svg{
         <p id="intro-comparison" hidden></p>
     </div>
     <div id="intro-actions">
+        <!-- Start-Schaltfläche zum Beginnen des Spiels -->
         <button id="start-button" type="button">Weiter</button>
+        <!-- Schaltfläche zum Schließen des Intro-Screens -->
         <button id="close-button" type="button" hidden>Schließen</button>
     </div>
 </section>
+<!-- Button, um das aktuelle Spiel jederzeit zu beenden -->
 <button id="quit-button" type="button" hidden>Aufhören</button>
 
+<!-- Haupt-SVG-Spielbereich mit Spielfeld und Objekten -->
 <svg
     id="field"
     xmlns="http://www.w3.org/2000/svg"
     width="100%"
     height="100%">
 
+    <!-- Anzeige des aktuellen Levels -->
     <text
         id="level-text"
         x="{{ spielrand + 20 }}"
@@ -241,6 +250,7 @@ svg{
         font-weight="700"
         font-family="Arial, Helvetica, sans-serif">Level {{ current_level }}</text>
 
+    <!-- Anzeige des aktuellen Punktestands -->
     <text
         id="score-text"
         x="{{ spielrand + 220 }}"
@@ -250,6 +260,7 @@ svg{
         font-weight="700"
         font-family="Arial, Helvetica, sans-serif">Punkte: {{ current_score }}</text>
 
+    <!-- Anzeige des letzten Ergebnisses bzw. Vergleichs zum vorherigen Spiel -->
     <text
         id="last-result-text"
         x="{{ spielrand + 20 }}"
@@ -258,6 +269,7 @@ svg{
         font-size="18"
         font-family="Arial, Helvetica, sans-serif">{% if last_result %}Letztes Spiel: {{ last_result.score }} Punkte{% if last_result.previous_score is not none %}, {{ last_result.comparison }} als zuvor ({{ last_result.previous_score }}){% else %}, {{ last_result.comparison }}{% endif %}{% else %}Noch kein gespeicherter Score{% endif %}</text>
 
+    <!-- Rahmen des Spielbereichs -->
     <rect
         id="spielfeld"
         x="{{ spielrand }}"
@@ -266,6 +278,7 @@ svg{
         stroke="{{ line_color }}"
         stroke-width="{{ line_width }}" />
 
+    <!-- Schlange: jedes Element wird aus Python-Daten rekursiv gerendert -->
     {% for c in circles %}
     <circle
         id="circle-{{ loop.index0 }}"
@@ -276,6 +289,7 @@ svg{
         stroke="none"/>
     {% endfor %}
 
+    <!-- Normales Essen im Spiel -->
     {% for food in foods %}
     <circle
         id="food-{{ loop.index0 }}"
@@ -286,6 +300,7 @@ svg{
         stroke="none"/>
     {% endfor %}
 
+    <!-- Kleines Essen, das bonusartig Punkte bringt -->
     {% for small_food in small_foods %}
     <circle
         id="small_food-{{ loop.index0 }}"
@@ -296,6 +311,7 @@ svg{
         stroke="none"/>
     {% endfor %}
 
+    <!-- Feindliche "angry birds" im Spiel -->
     {% for angry_bird in angry_birds %}
     <path
         id="angry-bird-{{ loop.index0 }}"
@@ -310,6 +326,7 @@ svg{
 
 <defs>
 
+<!-- Verläufe für den Kopf, den Körper und die Essensarten -->
 <radialGradient id="kopfGradient">
     <stop offset="0%" stop-color="#b6fff7"/>
     <stop offset="100%" stop-color="#00b7ff"/>
@@ -331,8 +348,10 @@ svg{
     <stop offset="100%" stop-color="#00ff00"/>
 </radialGradient>
 
+<!-- SVG-Verläufe und Farbdesign für Schlange, Essen und Gegner -->
 </defs>
 
+<!-- JavaScript-Datei für Spielsteuerung und Animation -->
 <script src="{{ url_for('static', filename='script.js') }}"></script>
 
 </body>
