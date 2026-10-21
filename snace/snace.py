@@ -1,6 +1,6 @@
 from kreise import Kreise
+from angry_bird import Angry_Bird
 from essen import Essen
-from klein_essen import KleinEssen
 from levels import get_level, get_level_for_length, get_next_level
 import random
 
@@ -48,8 +48,7 @@ class Snace:
         radius = durchmesser / 2
 
         self.min_x = spielrand + radius
-        self.max_x = spielrand + spielfeld_width - radius
-        
+        self.max_x = spielrand + spielfeld_width - radius      
         self.min_y = spielrand + radius
         self.max_y = spielrand + spielfeld_height - radius
 
@@ -63,109 +62,43 @@ class Snace:
         self.anzahl = anzahl
 
         self.normal_essen = Essen(farbe_essen, durchmesser_essen, 0, 0)
-        self.small_essen = KleinEssen("green", durchmesser_essen, 0, 0)
-        self.angry_bird = None
+        self.small_essen = Essen("green", durchmesser_essen, 0, 0)
+        self.angry_bird = Angry_Bird("green", 50, x, y)
 
         self.essen = self.normal_essen
         self._spawn_food(self.normal_essen)
         if get_level_for_length(self.length).number >= 2:
             self._spawn_food(self.small_essen, exclude={(self.normal_essen.x, self.normal_essen.y)})
 
-        self.current_direction = None
+        self.aktuelle_Richtung = None
         self.current_level = get_level(1)
         self.food_eaten_in_level = 0
         self.required_food_for_level = 2
 
-    def _spawn_angry_bird(self):
-        occupied_positions = {
-            (segment.x, segment.y) for segment in self.segments
-        }
-        occupied_positions.add((self.normal_essen.x, self.normal_essen.y))
-        occupied_positions.add((self.small_essen.x, self.small_essen.y))
-
-        x_steps = int((self.max_x - self.min_x) / self.durchmesser)
-        y_steps = int((self.max_y - self.min_y) / self.durchmesser)
-        while True:
-            x = self.min_x + random.randint(0, x_steps) * self.durchmesser
-            y = self.min_y + random.randint(0, y_steps) * self.durchmesser
-            if (x, y) not in occupied_positions:
-                self.angry_bird = {
-                    "cx": x,
-                    "cy": y,
-                    "r": self.durchmesser / 2,
-                    "color": "#2da44e",
-                }
-                return
-
-    def _move_angry_bird(self, head):
-        if self.angry_bird is None:
-            return
-
-        bird_x = self.angry_bird["cx"]
-        bird_y = self.angry_bird["cy"]
-        distance_x = head.x - bird_x
-        distance_y = head.y - bird_y
-
-        if abs(distance_x) >= abs(distance_y) and distance_x != 0:
-            self.angry_bird["cx"] += self.durchmesser if distance_x > 0 else -self.durchmesser
-        elif distance_y != 0:
-            self.angry_bird["cy"] += self.durchmesser if distance_y > 0 else -self.durchmesser
-
-    def _spawn_food(self, food, exclude=None):
-        x_steps = int((self.max_x - self.min_x) / self.durchmesser)
-        y_steps = int((self.max_y - self.min_y) / self.durchmesser)
-
-        occupied_positions = {(segment.x, segment.y) for segment in self.segments}
-        if exclude is not None:
-            occupied_positions |= exclude
-
-        while True:
-            x = self.min_x + random.randint(0, x_steps) * self.durchmesser
-            y = self.min_y + random.randint(0, y_steps) * self.durchmesser
-
-            if (x, y) not in occupied_positions:
-                food.x = x
-                food.y = y
-                return
-
-    def move(self, direction):
+    def direction(self, direction):
         if direction in DIRECTION_VECTORS:
-            if self.current_direction is None:
-                self.current_direction = direction
-            elif OPPOSITE_DIRECTIONS[self.current_direction] != direction:
-                self.current_direction = direction
+                    if self.aktuelle_Richtung is None:
+                        self.aktuelle_Richtung = direction
+                    elif OPPOSITE_DIRECTIONS[self.aktuelle_Richtung] != direction:
+                        self.aktuelle_Richtung = direction
+        
+                    if self.aktuelle_Richtung is None:
+                        return {"ate_normal_food": False, "level_up": False}
+        
 
-        if self.current_direction is None:
-            return {"ate_normal_food": False, "level_up": False}
+
+    def move(self):
 
         if get_level_for_length(self.length).number >= 2 and self.small_essen.x == 0 and self.small_essen.y == 0:
             self._spawn_food(self.small_essen, exclude={(self.normal_essen.x, self.normal_essen.y)})
 
-        dx, dy = DIRECTION_VECTORS[self.current_direction]
+        dx, dy = DIRECTION_VECTORS[self.aktuelle_Richtung]
         tail_position = (self.segments[-1].x, self.segments[-1].y)
 
-        for index in range(self.length - 1, 0, -1):
-            self.segments[index].x = self.segments[index - 1].x
-            self.segments[index].y = self.segments[index - 1].y
-
-        head = self.segments[0]
-        head.x += dx * self.durchmesser
-        head.y += dy * self.durchmesser
-
-        if head.x < self.min_x:
-            head.x = self.max_x
-        elif head.x > self.max_x:
-            head.x = self.min_x
-        
-        if head.y < self.min_y:
-            head.y = self.max_y
-        elif head.y > self.max_y:
-            head.y = self.min_y
 
         if get_level_for_length(self.length).Angry_Bird_c:
             if self.angry_bird is None:
                 self._spawn_angry_bird()
-            self._move_angry_bird(head)
 
         ate_normal_food = False
         level_up = False

@@ -40,18 +40,18 @@ def create_snake(width, height):
 
 snake = create_snake(FIELD_WIDTH, FIELD_HEIGHT)
 score_database = ScoreDatabase()
-current_direction = "right"
+aktuelle_Richtung = "right"
 game_started = threading.Event()
 game_lock = threading.Lock()
 game_result = None
 
 
 def move_snake_loop():
-    global current_direction
+    global aktuelle_Richtung
 
     while True:
         game_started.wait()
-        snake.move(current_direction)
+        snake.move(aktuelle_Richtung)
         if snake.length <= 1:
             finish_current_game()
         time.sleep(snake.wartezeit / 1000)
@@ -91,12 +91,12 @@ def api_snake():
 
 @app.route("/richtung/<richtung>")
 def richtung(richtung):
-    global current_direction
+    global aktuelle_Richtung
 
     if richtung in ["up", "down", "left", "right"]:
-        current_direction = richtung
+        aktuelle_Richtung = richtung
 
-    return jsonify({"richtung": current_direction})
+    return jsonify({"richtung": aktuelle_Richtung})
 
 
 @app.route("/api/finish-game", methods=["POST"])
@@ -120,11 +120,11 @@ def finish_current_game():
 
 @app.route("/api/start-game", methods=["POST"])
 def start_game():
-    global snake, current_direction, game_result
+    global snake, aktuelle_Richtung, game_result
 
     with game_lock:
         snake = create_snake(FIELD_WIDTH, FIELD_HEIGHT)
-        current_direction = "right"
+        aktuelle_Richtung = "right"
         game_result = None
         game_started.set()
     return jsonify({"started": True})

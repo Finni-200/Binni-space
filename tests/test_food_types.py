@@ -26,12 +26,12 @@ def test_normal_food_grows_snake_and_small_food_shrinks_snake():
 
     snake.normal_essen.x = snake.liste[0].x + snake.durchmesser
     snake.normal_essen.y = snake.liste[0].y
-    snake.current_direction = "right"
+    snake.aktuelle_Richtung = "right"
     snake.move("right")
     assert len(snake.liste) == initial_length + 1
 
     snake.small_essen.x = snake.liste[0].x + snake.durchmesser
     snake.small_essen.y = snake.liste[0].y
-    snake.current_direction = "right"
+    snake.aktuelle_Richtung = "right"
     snake.move("right")
     assert len(snake.liste) == initial_length

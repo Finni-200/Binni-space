@@ -76,7 +76,7 @@ def test_green_mouth_obstacle_follows_snake_one_step_at_a_time():
     )
     snake.normal_essen.x = 20
     snake.normal_essen.y = 20
-    snake.current_direction = "right"
+    snake.aktuelle_Richtung = "right"
     snake.angry_bird = {"cx": 20, "cy": 200, "r": 10, "color": "#2da44e"}
 
     snake.move("right")
@@ -103,7 +103,7 @@ def test_snake_advances_to_next_level_after_required_food():
 
     snake.normal_essen.x = snake.liste[0].x + snake.durchmesser
     snake.normal_essen.y = snake.liste[0].y
-    snake.current_direction = "right"
+    snake.aktuelle_Richtung = "right"
 
     first_result = snake.move("right")
     assert first_result["ate_normal_food"] is True

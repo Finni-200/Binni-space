@@ -27,7 +27,7 @@ def test_eating_food_grows_snake_and_spawns_new_food():
 
     snake.essen.x = snake.liste[0].x + snake.durchmesser
     snake.essen.y = snake.liste[0].y
-    snake.current_direction = "right"
+    snake.aktuelle_Richtung = "right"
 
     snake.move("right")
 
