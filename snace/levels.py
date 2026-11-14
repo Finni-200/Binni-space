@@ -23,7 +23,7 @@ LEVELS = [
     Level(number=3, name="Level 3", speed=100, normal_f_c=1, small_f_c=1, Angry_Bird_c=0, W=0, description="Mehr Essen in 10 sek", minimum_length=7),
     Level(number=4, name="Level 4", speed=100, normal_f_c=1, small_f_c=1, Angry_Bird_c=1, W=0, description="Mit Angry Birds", minimum_length=9),
     Level(number=5, name="Level 5", speed=100, normal_f_c=1, small_f_c=1, Angry_Bird_c=1, W=0, description="Angry Birds in 10 sek", minimum_length=11),
-    Level(number=6, name="Level 6", speed=300, normal_f_c=1, small_f_c=1, Angry_Bird_c=1, W=0, description="Jetzt wird es schnell", minimum_length=13),
+    Level(number=6, name="Level 6", speed=100, normal_f_c=1, small_f_c=1, Angry_Bird_c=1, W=0, description="Jetzt wird es schnell", minimum_length=13),
     Level(number=7, name="Level 7", speed=100, normal_f_c=1, small_f_c=1, Angry_Bird_c=1, W=1, description="Jezt kommen die Wände", minimum_length=15),
     Level(number=8, name="Level 8", speed=100, normal_f_c=1, small_f_c=1, Angry_Bird_c=1, W=1, description="Wände und small Essen", minimum_length=17),
     Level(number=9, name="Level 9", speed=100, normal_f_c=1, small_f_c=1, Angry_Bird_c=1, W=1, description="Wände und Angry Birds", minimum_length=19),

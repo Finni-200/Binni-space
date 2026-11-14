@@ -1,37 +1,29 @@
+import unittest
+
 import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "snace"))
 
-from snace import Snace
+from game import Game
+from spiel_feld import Spiel_Feld
 
 
-def test_normal_food_grows_snake_and_small_food_shrinks_snake():
-    snake = Snace(
-        x_1=100,
-        y=100,
-        farbe="red",
-        farbe_1="green",
-        durchmesser=20,
-        anzahl=4,
-        wartezeit=100,
-        spielfeld_width=200,
-        spielfeld_height=200,
-        spielrand=0,
-        farbe_essen="blue",
-        durchmesser_essen=10,
-    )
+class FoodTypesTest(unittest.TestCase):
+    def test_normal_food_grows_snake_and_small_food_shrinks_snake(self):
+        game = Game(Spiel_Feld(400, 300, 0, 20))
+        snake = game.snake
+        initial_length = len(snake.segments)
+        head = snake.segments[0]
+        game.normal_essen.x = head.x + snake.durchmesser
+        game.normal_essen.y = head.y
+        game.tick()
 
-    initial_length = len(snake.liste)
+        self.assertEqual(len(snake.segments), initial_length + 1)
 
-    snake.normal_essen.x = snake.liste[0].x + snake.durchmesser
-    snake.normal_essen.y = snake.liste[0].y
-    snake.aktuelle_Richtung = "right"
-    snake.move("right")
-    assert len(snake.liste) == initial_length + 1
-
-    snake.small_essen.x = snake.liste[0].x + snake.durchmesser
-    snake.small_essen.y = snake.liste[0].y
-    snake.aktuelle_Richtung = "right"
-    snake.move("right")
-    assert len(snake.liste) == initial_length
+        head = snake.segments[0]
+        target = (head.x + snake.durchmesser, head.y)
+        game.spawn_food(game.normal_essen, exclude={target})
+        game.small_essen.x, game.small_essen.y = target
+        game.tick()
+        self.assertEqual(len(snake.segments), initial_length)

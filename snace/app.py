@@ -1,8 +1,9 @@
-from flask import Flask, render_template, jsonify, request
-from snace import Snace
-from levels import get_level_for_length
+from flask import Flask, jsonify, render_template, request
+
+from data import Data
+from game import Game
 from score_database import ScoreDatabase
-import math
+from spiel_feld import Spiel_Feld
 import threading
 import time
 
@@ -13,48 +14,32 @@ LINE_COLOR = "#ff0000"
 LINE_WIDTH = 4
 SPIELRAND = 50
 KREIS_DURCHMESSER = 50
-ESSEN_DURCHMESSER = 50
 FIELD_WIDTH = 1800
 FIELD_HEIGHT = 950
 
-
-def create_snake(width, height):
-    start_x = SPIELRAND + (width // 2)
-    start_y = SPIELRAND + (height // 2)
-
-    return Snace(
-        x_1=start_x,
-        y=start_y,
-        farbe="red",
-        farbe_1="green",
-        durchmesser=KREIS_DURCHMESSER,
-        anzahl=4,
-        wartezeit=100,
-        spielfeld_width=width,
-        spielfeld_height=height,
-        spielrand=SPIELRAND,
-        farbe_essen="blue",
-        durchmesser_essen=ESSEN_DURCHMESSER,
-    )
-
-
-snake = create_snake(FIELD_WIDTH, FIELD_HEIGHT)
+spielfeld = Spiel_Feld(
+    FIELD_WIDTH,
+    FIELD_HEIGHT,
+    SPIELRAND,
+    KREIS_DURCHMESSER,
+)
+game = Game(spielfeld)
 score_database = ScoreDatabase()
-aktuelle_Richtung = "right"
 game_started = threading.Event()
 game_lock = threading.Lock()
 game_result = None
 
 
 def move_snake_loop():
-    global aktuelle_Richtung
-
     while True:
         game_started.wait()
-        snake.move(aktuelle_Richtung)
-        if snake.length <= 1:
+        with game_lock:
+            result = game.tick()
+            game_over = result["game_over"]
+            delay = game.snake.wartezeit / 1000
+        if game_over:
             finish_current_game()
-        time.sleep(snake.wartezeit / 1000)
+        time.sleep(delay)
 
 
 @app.route("/")
@@ -62,46 +47,26 @@ def index():
     game_started.clear()
     return render_template(
         "index.html",
-        circles=snake.get_kreise(),
-        foods=snake.get_food_data(),
-        small_foods=snake.get_small_food_data(),
-        angry_birds=snake.get_angry_bird_data(),
-        spielrand=SPIELRAND,
+        **Data.get_index_data(game, spielfeld, score_database),
         line_color=LINE_COLOR,
         line_width=LINE_WIDTH,
-        current_level=get_level_for_length(snake.length).number,
-        last_result=score_database.get_last_result(),
-        current_score=snake.score,
     )
 
 
 @app.route("/api/snake")
 def api_snake():
-    return jsonify(
-        snake=snake.get_kreise(),
-        foods=snake.get_food_data(),
-        small_foods=snake.get_small_food_data(),
-        angry_birds=snake.get_angry_bird_data(),
-        current_level=get_level_for_length(snake.length).number,
-        score=snake.score,
-        game_over=game_result is not None,
-        game_result=game_result,
-    )
+    return jsonify(Data.get_game_data(game, game_result))
 
 
 @app.route("/richtung/<richtung>")
 def richtung(richtung):
-    global aktuelle_Richtung
-
-    if richtung in ["up", "down", "left", "right"]:
-        aktuelle_Richtung = richtung
-
-    return jsonify({"richtung": aktuelle_Richtung})
+    game.set_direction(richtung)
+    return jsonify(Data.get_direction_data(game))
 
 
 @app.route("/api/finish-game", methods=["POST"])
 def finish_game():
-    return jsonify(finish_current_game())
+    return jsonify(Data.get_finish_game_data(finish_current_game()))
 
 
 def finish_current_game():
@@ -114,46 +79,42 @@ def finish_current_game():
             return {"saved": False}
 
         game_started.clear()
-        game_result = score_database.save_score(snake.score)
+        game_result = score_database.save_score(game.score)
         return game_result
 
 
 @app.route("/api/start-game", methods=["POST"])
 def start_game():
-    global snake, aktuelle_Richtung, game_result
+    global game, game_result
 
     with game_lock:
-        snake = create_snake(FIELD_WIDTH, FIELD_HEIGHT)
-        aktuelle_Richtung = "right"
+        game = Game(spielfeld)
         game_result = None
         game_started.set()
-    return jsonify({"started": True})
+    return jsonify(Data.get_start_game_data(game))
 
 
 @app.route("/update_field_size", methods=["POST"])
 def update_field_size():
-    global FIELD_WIDTH, FIELD_HEIGHT, snake
-
-    data = request.json or {}
+    data = request.get_json(silent=True) or {}
     width = data.get("width")
     height = data.get("height")
 
-    if isinstance(width, int) and isinstance(height, int):
-        new_width = math.ceil((width - SPIELRAND * 2) / KREIS_DURCHMESSER) * KREIS_DURCHMESSER
-        new_height = math.floor((height - SPIELRAND * 2) / KREIS_DURCHMESSER) * KREIS_DURCHMESSER
+    if (
+        isinstance(width, bool)
+        or not isinstance(width, int)
+        or isinstance(height, bool)
+        or not isinstance(height, int)
+    ):
+        return jsonify({"error": "Ungültige Fenstergröße"}), 400
 
-        if new_width != FIELD_WIDTH or new_height != FIELD_HEIGHT:
-            previous_score = snake.score
-            FIELD_WIDTH = new_width
-            FIELD_HEIGHT = new_height
-            snake = create_snake(FIELD_WIDTH, FIELD_HEIGHT)
-            snake.score = previous_score
+    with game_lock:
+        game.update_field_size(width, height)
 
-    return jsonify(field_width=FIELD_WIDTH, field_height=FIELD_HEIGHT)
+    return jsonify(Data.get_field_size_data(spielfeld))
 
 
 if __name__ == "__main__":
     thread = threading.Thread(target=move_snake_loop, daemon=True)
     thread.start()
     app.run(debug=True, use_reloader=False, port=5001)
-    
