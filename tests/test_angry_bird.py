@@ -39,7 +39,7 @@ def test_wall_bounce_random_angle_is_limited_by_approach_angle():
     )
 
 
-def test_game_tick_moves_angry_bird():
+def test_game_moves_angry_bird_independently():
     game = Game(Spiel_Feld(600, 400, 0, 20))
     snake = game.snake
     tail = snake.segments[-1]
@@ -63,6 +63,6 @@ def test_game_tick_moves_angry_bird():
     )
     start_position = (game.angry_bird.x, game.angry_bird.y)
 
-    game.tick()
+    game.move_angry_bird()
 
     assert (game.angry_bird.x, game.angry_bird.y) != start_position

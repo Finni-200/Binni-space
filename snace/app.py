@@ -42,6 +42,19 @@ def move_snake_loop():
         time.sleep(delay)
 
 
+def move_angry_bird_loop():
+    while True:
+        game_started.wait()
+        with game_lock:
+            if game.game_over:
+                game_over = True
+            else:
+                game_over = game.move_angry_bird()
+        if game_over:
+            finish_current_game()
+        time.sleep(0.05)
+
+
 @app.route("/")
 def index():
     game_started.clear()
@@ -115,6 +128,11 @@ def update_field_size():
 
 
 if __name__ == "__main__":
-    thread = threading.Thread(target=move_snake_loop, daemon=True)
-    thread.start()
+    snake_thread = threading.Thread(target=move_snake_loop, daemon=True)
+    angry_bird_thread = threading.Thread(
+        target=move_angry_bird_loop,
+        daemon=True,
+    )
+    snake_thread.start()
+    angry_bird_thread.start()
     app.run(debug=True, use_reloader=False, port=5001)

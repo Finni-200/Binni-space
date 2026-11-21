@@ -18,9 +18,9 @@ WINNER = 10
 
 
 LEVELS = [
-    Level(number=1, name="Level 1", speed=100, normal_f_c=1, small_f_c=0, Angry_Bird_c=0, W=0, description="Einfacher Start", minimum_length=1),
-    Level(number=2, name="Level 2", speed=100, normal_f_c=1, small_f_c=1, Angry_Bird_c=0, W=0, description="Zwei Essen", minimum_length=5),
-    Level(number=3, name="Level 3", speed=100, normal_f_c=1, small_f_c=1, Angry_Bird_c=0, W=0, description="Mehr Essen in 10 sek", minimum_length=7),
+    Level(number=1, name="Level 1", speed=100, normal_f_c=1, small_f_c=0, Angry_Bird_c=1, W=0, description="Einfacher Start", minimum_length=1),
+    Level(number=2, name="Level 2", speed=100, normal_f_c=1, small_f_c=1, Angry_Bird_c=1, W=0, description="Zwei Essen", minimum_length=5),
+    Level(number=3, name="Level 3", speed=100, normal_f_c=1, small_f_c=1, Angry_Bird_c=1, W=0, description="Mehr Essen in 10 sek", minimum_length=7),
     Level(number=4, name="Level 4", speed=100, normal_f_c=1, small_f_c=1, Angry_Bird_c=1, W=0, description="Mit Angry Birds", minimum_length=9),
     Level(number=5, name="Level 5", speed=100, normal_f_c=1, small_f_c=1, Angry_Bird_c=1, W=0, description="Angry Birds in 10 sek", minimum_length=11),
     Level(number=6, name="Level 6", speed=100, normal_f_c=1, small_f_c=1, Angry_Bird_c=1, W=0, description="Jetzt wird es schnell", minimum_length=13),

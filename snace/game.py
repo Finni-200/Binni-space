@@ -88,25 +88,11 @@ class Game:
                 "game_over": True,
             }
 
-        if self.angry_bird is not None:
-            self.angry_bird.move(
-                self.snake.min_x,
-                self.snake.max_x,
-                self.snake.min_y,
-                self.snake.max_y,
-                self.snake.durchmesser,
-            )
-
         head = self.snake.segments[0]
         if any(
             (head.x, head.y) == (segment.x, segment.y)
             for segment in self.snake.segments[1:]
         ):
-            self.game_over = True
-        if self.angry_bird is not None and (
-            head.x,
-            head.y,
-        ) == (self.angry_bird.x, self.angry_bird.y):
             self.game_over = True
 
         ate_normal_food = not self.game_over and self._touches(self.normal_essen)
@@ -144,6 +130,23 @@ class Game:
             "game_over": self.game_over,
         }
 
+    def move_angry_bird(self):
+        if self.game_over or self.angry_bird is None:
+            return False
+
+        self.angry_bird.move(
+            self.snake.min_x,
+            self.snake.max_x,
+            self.snake.min_y,
+            self.snake.max_y,
+            self.snake.durchmesser,
+        )
+
+        if self._tollerranz_touch(self.angry_bird):
+            self.snake.score -= 2
+            return True
+        return False
+
     def _ensure_level_objects(self):
         if self.current_level.normal_f_c and (
             self.normal_essen.x,
@@ -172,6 +175,12 @@ class Game:
         return (self.snake.segments[0].x, self.snake.segments[0].y) == (
             item.x,
             item.y,
+        )
+
+    def _tollerranz_touch(self, bird):
+        return (
+            abs(self.snake.segments[0].x - bird.x) < self.snake.durchmesser
+            and abs(self.snake.segments[0].y - bird.y) < self.snake.durchmesser
         )
 
     def _grid_values(self, minimum, maximum):
