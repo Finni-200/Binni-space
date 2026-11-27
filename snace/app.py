@@ -135,4 +135,4 @@ if __name__ == "__main__":
     )
     snake_thread.start()
     angry_bird_thread.start()
-    app.run(debug=True, use_reloader=False, port=5001)
+    app.run(debug=True, use_reloader=False, port=5002)
