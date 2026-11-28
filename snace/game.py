@@ -5,6 +5,7 @@ from essen import Essen
 from levels import get_level_for_length
 from snace import Snace
 
+COLLISION_TOLERANCE_RATIO = 0.1
 
 class Game:
     def __init__(self, spielfeld):
@@ -139,7 +140,7 @@ class Game:
             self.snake.max_x,
             self.snake.min_y,
             self.snake.max_y,
-            self.snake.durchmesser,
+            0.05,
         )
 
         if self._tollerranz_touch(self.angry_bird):
@@ -179,8 +180,8 @@ class Game:
 
     def _tollerranz_touch(self, bird):
         return (
-            abs(self.snake.segments[0].x - bird.x) < self.snake.durchmesser
-            and abs(self.snake.segments[0].y - bird.y) < self.snake.durchmesser
+            abs(self.snake.segments[0].x - bird.x) < self.snake.durchmesser + COLLISION_TOLERANCE_RATIO 
+            and abs(self.snake.segments[0].y - bird.y) < self.snake.durchmesser + COLLISION_TOLERANCE_RATIO
         )
 
     def _grid_values(self, minimum, maximum):

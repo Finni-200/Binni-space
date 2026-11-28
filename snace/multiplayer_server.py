@@ -13,10 +13,6 @@ game_started = False
 lobby_lock = Lock()
 
 
-@app.get("/")
-def server_status():
-    return "Multiplayer-Server ist gestartet."
-
 
 @app.get("/api/status")
 def lobby_status():

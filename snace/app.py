@@ -1,5 +1,4 @@
 from flask import Flask, jsonify, render_template, request
-
 from data import Data
 from game import Game
 from score_database import ScoreDatabase
@@ -52,7 +51,7 @@ def move_angry_bird_loop():
                 game_over = game.move_angry_bird()
         if game_over:
             finish_current_game()
-        time.sleep(0.05)
+        time.sleep(0.005)
 
 
 @app.route("/")
